@@ -1,4 +1,6 @@
 .asm-lsp.toml
 .clangd
+obj/
+bin/
 
 compile_commands.json
