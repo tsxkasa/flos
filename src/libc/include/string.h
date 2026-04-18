@@ -1,9 +1,11 @@
-#ifndef STRING_H
-#define STRING_H
+#ifndef _STRING_H
+#define _STRING_H
 
-#include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void *memcpy(void *restrict dest, const void *restrict src, size_t n);
 
@@ -13,4 +15,10 @@ void *memmove(void *dest, const void *src, size_t n);
 
 int memcmp(const void *s1, const void *s2, size_t n);
 
-#endif // STRING_H
+size_t strlen(const char *s);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // _STRING_H

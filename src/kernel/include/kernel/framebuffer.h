@@ -1,6 +1,5 @@
-#ifndef FRAMEBUFFER_H
-#define FRAMEBUFFER_H
-
+#ifndef _KERNEL_FRAMEBUFFER_H
+#define _KERNEL_FRAMEBUFFER_H
 #include <stddef.h>
 #include <stdint.h>
 
@@ -19,4 +18,4 @@ void fb_fill_rect(framebuffer_t *fb, uint64_t x, uint64_t y, uint64_t w,
                   uint64_t h, uint32_t color);
 void fb_clear(framebuffer_t *fb, uint32_t color);
 
-#endif // FRAMEBUFFER_H
+#endif // _KERNEL_FRAMEBUFFER_H

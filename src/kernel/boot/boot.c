@@ -1,6 +1,5 @@
 #include <boot/boot.h>
 #include <cpu/halt.h>
-#include <drivers/video/framebuffer.h>
 #include <limine.h>
 
 __attribute__((used, section(".limine_requests"))) static volatile uint64_t

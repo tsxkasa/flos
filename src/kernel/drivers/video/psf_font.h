@@ -1,7 +1,6 @@
-#ifndef FONTS_H
-#define FONTS_H
+#ifndef PSF_FONTS_H
+#define PSF_FONTS_H
 
-#include <drivers/video/framebuffer.h>
 #include <stdint.h>
 
 #define PSF_FONT_MAGIC 0x864ab572
@@ -28,17 +27,6 @@ typedef struct {
   uint8_t *glyphs; /* pointer to glyph bitmap data */
 } psf_font_t;
 
-/* Console state: tracks cursor position in character cells */
-typedef struct {
-  framebuffer_t *fb;
-  psf_font_t font;
-  uint32_t cx, cy; /* cursor col, row (in chars) */
-  uint32_t fg, bg; /* foreground/background ARGB */
-} console_t;
-
 void psf_load(psf_font_t *font);
-void console_init(console_t *con, framebuffer_t *fb, uint32_t fg, uint32_t bg);
-void console_putchar(console_t *con, char c);
-void console_puts(console_t *con, const char *s);
 
-#endif // FONTS_H
+#endif // PSF_FONTS_H

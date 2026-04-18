@@ -1,7 +1,11 @@
+# LSP
 .asm-lsp.toml
 .clangd
+compile_commands.json
+
+# build artifacts
 obj/
 bin/
 build/
-
-compile_commands.json
+sysroot/
+iso_root/

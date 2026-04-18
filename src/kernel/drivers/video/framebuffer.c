@@ -1,4 +1,4 @@
-#include <drivers/video/framebuffer.h>
+#include <kernel/framebuffer.h>
 
 void fb_init(framebuffer_t *fb, volatile uint32_t *addr, uint64_t width,
              uint64_t height, uint64_t pitch) {
