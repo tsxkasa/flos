@@ -31,7 +31,13 @@ ifeq ($(TOOLCHAIN),llvm)
 endif
 
 # User controllable C flags.
-CFLAGS := -g -O2 -pipe
+CFLAGS := -pipe
+
+ifeq ($(DEBUG),1)
+    CFLAGS += -g -O0
+else
+    CFLAGS += -g -O2
+endif
 
 # User controllable C preprocessor flags. We set none by default.
 CPPFLAGS :=
@@ -71,7 +77,9 @@ override CFLAGS += \
     -mno-sse \
     -mno-sse2 \
     -mno-red-zone \
-    -mcmodel=kernel
+    -mcmodel=kernel \
+		-nostdlib \
+		-fno-builtin \
 
 INCLUDE_DIRS := $(shell find src deps -type d 2>/dev/null)
 
@@ -95,7 +103,7 @@ override LDFLAGS += \
     -static \
     -z max-page-size=0x1000 \
     --gc-sections \
-    -T linker.lds
+    -T linker.ld
 
 # Use "find" to glob all *.c, *.S, and *.asm files in the tree and obtain the
 # object and header dependency file names.
@@ -103,20 +111,22 @@ override SRCFILES := $(shell find -L src -type f 2>/dev/null | LC_ALL=C sort)
 override CFILES := $(filter %.c,$(SRCFILES))
 override ASFILES := $(filter %.S,$(SRCFILES))
 override NASMFILES := $(filter %.asm,$(SRCFILES))
-override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o))
+override FONTFILES := $(shell find -L assets -type f -name '*.psf' 2>/dev/null)
+override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o) $(FONTFILES:.psf=.psf.o))
 override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
 
 # Default target. This must come first, before header dependencies.
 .PHONY: all
 all: bin/$(OUTPUT)
 
+
 # Include header dependencies.
 -include $(HEADER_DEPS)
 
 # Link rules for the final executable.
-bin/$(OUTPUT): GNUmakefile linker.lds $(OBJ)
+bin/$(OUTPUT): GNUmakefile linker.ld $(OBJ)
 	mkdir -p "$(dir $@)"
-	$(LD) $(LDFLAGS) $(OBJ) -o $@
+	$(LD) $(LDFLAGS) $(OBJ)  -o $@
 
 # Compilation rules for *.c files.
 obj/%.c.o: %.c GNUmakefile
@@ -132,6 +142,15 @@ obj/%.S.o: %.S GNUmakefile
 obj/%.asm.o: %.asm GNUmakefile
 	mkdir -p "$(dir $@)"
 	nasm $(NASMFLAGS) $< -o $@
+
+obj/%.psf.o: %.psf GNUmakefile
+	mkdir -p "$(dir $@)"
+ifeq ($(TOOLCHAIN),llvm)
+	llvm-objcopy -O elf64-x86-64 -B i386 -I binary $< $@
+else
+	objcopy -O elf64-x86-64 -B i386 -I binary $< $@
+endif
+
 
 # Remove object files and the final executable.
 .PHONY: clean
