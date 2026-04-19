@@ -59,5 +59,8 @@ void interrupt_handler(struct interrupt_frame *frame) {
            frame->rdi, frame->rbp, frame->r8, frame->r9, frame->r10, frame->r11,
            frame->r12, frame->r13, frame->r14, frame->r15, frame->ss,
            frame->rsp, frame->rflags, frame->cs, frame->rip);
+
+    while (1)
+      __asm__ volatile("cli; hlt");
   }
 }
