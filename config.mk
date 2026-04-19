@@ -1,9 +1,14 @@
 HOST ?= x86_64-unknown-none-elf
 HOSTARCH := x86_64
+GCC_ARCH := x86_64-elf
 
 # User controllable toolchain and toolchain prefix.
 TOOLCHAIN ?= llvm
 TOOLCHAIN_PREFIX ?=
+
+ifneq ($(TOOLCHAIN), llvm)
+	TOOLCHAIN_PREFIX = $(GCC_ARCH)-
+endif
 
 ifeq ($(TOOLCHAIN),llvm)
     CC := $(TOOLCHAIN_PREFIX)clang
@@ -38,9 +43,9 @@ LIBDIR := $(EXEC_PREFIX)/lib
 DEBUG ?= 0
 # Global C Flags
 ifeq ($(DEBUG), 1)
-CFLAGS ?= -O0 -g -pipe -DDEBUG
+CFLAGS ?= -O0 -ggdb -pipe -DDEBUG 
 else
-CFLAGS ?= -O2 -g -pipe -DNDEBUG
+CFLAGS ?= -O2 -ggdb -pipe -DNDEBUG
 endif
 CFLAGS += -Wall -Wextra -std=gnu11 -ffreestanding
 
