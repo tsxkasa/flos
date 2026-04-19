@@ -2,14 +2,16 @@
 #include <cpu/halt.h>
 #include <drivers/tty/tty.h>
 #include <gdt.h>
+#include <idt.h>
 #include <kernel/printk.h>
 
 // entry point
 void kmain(void) {
   // asm volatile("int3"); // DEBUG
   boot_init();
-  terminal_initialize();
+  tty_init();
   init_gdt();
+  init_idt();
 
   printk("Hello kernel!\n");
   printk("linked %s!\n", "libc");

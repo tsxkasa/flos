@@ -29,7 +29,7 @@ static void draw_glyph(unsigned char c, uint64_t px, uint64_t py) {
   }
 }
 
-void terminal_initialize(void) {
+void tty_init(void) {
   term_fb = boot_get_framebuffer();
   psf_load(&term_font);
   term_cx = 0;
@@ -37,7 +37,7 @@ void terminal_initialize(void) {
   fb_clear(term_fb, term_bg);
 }
 
-void terminal_putchar(char c) {
+void tty_putchar(char c) {
   psf2_header_t *header = term_font.header;
   uint32_t cols = term_fb->width / header->width;
   uint32_t rows = term_fb->height / header->height;
@@ -70,14 +70,14 @@ void terminal_putchar(char c) {
   }
 }
 
-void terminal_write(const char *data, size_t size) {
+void tty_write(const char *data, size_t size) {
   for (size_t i = 0; i < size; i++) {
-    terminal_putchar(data[i]);
+    tty_putchar(data[i]);
   }
 }
 
-void terminal_writestring(const char *data) {
+void tty_writestring(const char *data) {
   while (*data) {
-    terminal_putchar(*data++);
+    tty_putchar(*data++);
   }
 }
