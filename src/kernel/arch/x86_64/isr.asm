@@ -43,9 +43,11 @@ _isr_handler:
 
   cld
 
+  mov rdi, rsp
+
   mov rbx, rsp
   and rsp, -16        ; Align stack to a 16-byte boundary
-  mov rdi, rsp
+
   call interrupt_handler
   mov rsp, rbx
 
