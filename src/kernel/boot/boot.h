@@ -1,7 +1,7 @@
 #ifndef BOOT_H
 #define BOOT_H
 
-#include <kernel/framebuffer.h>
+#include <drivers/video/framebuffer.h>
 
 // Populates kernel abstractions from bootloader responses.
 // Called once at the very top of kmain, never again.

@@ -1,5 +1,5 @@
 #include <gdt.h>
-#include <stdio.h>
+#include <kernel/printk.h>
 
 extern void _load_gdt(struct gdtr *gdt);
 
@@ -73,5 +73,5 @@ void init_gdt(void) {
 
   _load_gdt(&gdt);
 
-  printf("GDT initialized.\n");
+  printk("GDT initialized.\n");
 }

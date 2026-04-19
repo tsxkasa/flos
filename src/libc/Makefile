@@ -3,43 +3,26 @@ include $(TOPDIR)/config.mk
 
 OBJDIR := ../../obj/libc
 
-# Flags specific to building libc
 CFLAGS += -fno-stack-protector -fno-stack-check -fno-lto -fno-PIC
-CPPFLAGS += -D__is_libc -Iinclude
-
-LIBK_CFLAGS := $(CFLAGS)
-LIBK_CPPFLAGS := $(CPPFLAGS) -D__is_libk
+CPPFLAGS += -Iinclude
 
 SRCFILES := $(patsubst ./%,%,$(shell find . -type f -name '*.c' -o -name '*.S' -o -name '*.asm' | LC_ALL=C sort))
 CFILES := $(filter %.c,$(SRCFILES))
-ASFILES := $(filter %.S,$(SRCFILES))
-NASMFILES := $(filter %.asm,$(SRCFILES))
 
-# FREEOBJS := $(CFILES:.c=.o) $(ASFILES:.S=.o) $(NASMFILES:.asm=.o)
-LIBK_OBJS := $(patsubst %.c,$(OBJDIR)/%.libk.c.o,$(CFILES)) \
-             $(patsubst %.S,$(OBJDIR)/%.libk.S.o,$(ASFILES)) \
-             $(patsubst %.asm,$(OBJDIR)/%.libk.asm.o,$(NASMFILES))
-
-BINARIES := $(OBJDIR)/libk.a
+LIBC_OBJS := $(patsubst %.c,$(OBJDIR)/%.c.o,$(CFILES))
+BINARIES := $(OBJDIR)/libc.a
 
 .PHONY: all clean install install-headers install-libs
 
 all: $(BINARIES)
 
-$(OBJDIR)/libk.a: $(LIBK_OBJS)
-	$(AR) rcs $@ $(LIBK_OBJS)
-
-$(OBJDIR)/%.libk.c.o: %.c
+$(OBJDIR)/libc.a: $(LIBC_OBJS)
 	@mkdir -p $(@D)
-	$(CC) -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+	$(AR) rcs $@ $(LIBC_OBJS)
 
-$(OBJDIR)/%.libk.S.o: %.S
+$(OBJDIR)/%.c.o: %.c
 	@mkdir -p $(@D)
-	$(CC) -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
-
-$(OBJDIR)/%.libk.asm.o: %.asm
-	@mkdir -p $(@D)
-	nasm $(NASMFLAGS) $< -o $@
+	$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 clean:
 	rm -rf $(OBJDIR) $(BINARIES)
@@ -54,4 +37,4 @@ install-libs: $(BINARIES)
 	mkdir -p $(DESTDIR)$(LIBDIR)
 	cp $(BINARIES) $(DESTDIR)$(LIBDIR)
 
--include $(LIBK_OBJS:.o=.d)
+-include $(LIBC_OBJS:.o=.d)

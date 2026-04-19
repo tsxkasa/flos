@@ -10,12 +10,10 @@ KERNEL_CFLAGS := $(CFLAGS) \
     -mno-80387 -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel \
     -nostdlib -fno-builtin
 
-KERNEL_CPPFLAGS := $(CPPFLAGS) -D__is_kernel -Iinclude -I. -Iarch/$(HOSTARCH)
+KERNEL_CPPFLAGS := $(CPPFLAGS) -D__is_kernel -Iinclude/lib -I. -Iarch/$(HOSTARCH)
 KERNEL_LDFLAGS := $(LDFLAGS) \
     -m elf_x86_64 -nostdlib -static -z max-page-size=0x1000 --gc-sections \
     -T linker.ld
-
-KERNEL_LIBS := -L$(DESTDIR)$(LIBDIR) -lk
 
 SRCFILES := $(patsubst ./%,%,$(shell find . -type f -name '*.c' -o -name '*.S' -o -name '*.asm' | LC_ALL=C sort))
 CFILES := $(filter %.c,$(SRCFILES))
@@ -38,7 +36,8 @@ FLOS := $(OBJDIR)/flos
 all: $(OBJDIR)/flos
 
 $(OBJDIR)/flos: $(OBJS) linker.ld
-	$(LD) $(KERNEL_LDFLAGS) $(OBJS) $(KERNEL_LIBS) -o $@
+	@mkdir -p $(@D)
+	$(LD) $(KERNEL_LDFLAGS) $(OBJS) -o $@
 
 $(OBJDIR)/%.c.o: %.c
 	@mkdir -p $(@D)
@@ -59,11 +58,7 @@ $(OBJDIR)/%.psf.o: %.psf
 clean:
 	rm -rf $(OBJDIR)
 
-install: install-headers install-kernel
-
-install-headers:
-	mkdir -p $(DESTDIR)$(INCLUDEDIR)
-	cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
+install: install-kernel
 
 install-kernel: $(OBJDIR)/flos
 	mkdir -p $(DESTDIR)$(BOOTDIR)
