@@ -1,5 +1,6 @@
 #include <boot/boot.h>
 #include <cpu/halt.h>
+#include <gdt.h>
 #include <kernel/tty.h>
 #include <stdio.h>
 
@@ -7,6 +8,8 @@
 void kmain(void) {
   // asm volatile("int3"); // DEBUG
   boot_init();
+
+  init_gdt();
 
   terminal_initialize();
 

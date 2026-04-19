@@ -34,8 +34,14 @@ BOOTDIR := /boot
 INCLUDEDIR := $(PREFIX)/include
 LIBDIR := $(EXEC_PREFIX)/lib
 
+
+DEBUG ?= 0
 # Global C Flags
-CFLAGS ?= -O2 -g -pipe
+ifeq ($(DEBUG), 1)
+CFLAGS ?= -O0 -g -pipe -DDEBUG
+else
+CFLAGS ?= -O2 -g -pipe -DNDEBUG
+endif
 CFLAGS += -Wall -Wextra -std=gnu11 -ffreestanding
 
 # Global Preprocessor flags
