@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-struct gdtr {
+struct gdtr_t {
   uint16_t limit;
   uint64_t ptr;
 } __attribute__((packed));

@@ -1,6 +1,6 @@
 global _load_gdt
 
-; void _load_gdt(struct gdtr *gdt);
+; void _load_gdt(struct gdtr_t *gdt);
 _load_gdt:
   lgdt  [rdi] ; first arg in UNIX
 

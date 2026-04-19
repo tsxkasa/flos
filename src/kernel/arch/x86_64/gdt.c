@@ -1,7 +1,7 @@
 #include <gdt.h>
 #include <kernel/printk.h>
 
-extern void _load_gdt(struct gdtr *gdt);
+extern void _load_gdt(struct gdtr_t *gdt);
 
 static struct gdt_desc gdt_descs[] = {
     // 0x0: null
@@ -50,7 +50,7 @@ static struct gdt_desc gdt_descs[] = {
     // 0x30: TSS descriptor high (base upper = 0)
     {0}};
 
-static struct gdtr gdt = {
+static struct gdtr_t gdt = {
     sizeof(gdt_descs) - 1,
     (uintptr_t)gdt_descs,
 };

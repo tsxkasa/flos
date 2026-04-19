@@ -13,7 +13,6 @@ void kmain(void) {
 
   printk("Hello kernel!\n");
   printk("linked %s!\n", "libc");
-  printk("test %c.\n", 65);
 
   // We're done, just hang...
   hcf();
