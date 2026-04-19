@@ -5,7 +5,7 @@
 #include <stdarg.h>
 
 #define PRINK_BUF_SIZE 1024
-const char string_buffer[1024];
+char string_buffer[1024];
 
 void printk(const char *format, ...) {
   va_list ptr;
