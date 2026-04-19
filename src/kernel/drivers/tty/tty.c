@@ -81,3 +81,5 @@ void tty_writestring(const char *data) {
     tty_putchar(*data++);
   }
 }
+
+void tty_clear(void) { fb_clear(term_fb, term_bg); }
