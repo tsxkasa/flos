@@ -17,7 +17,7 @@ struct gdt_desc {
   uint8_t base_hi;
 } __attribute__((packed));
 
-struct tss {
+struct tss_t {
   uint32_t resv0;
   uint64_t rsp0;
   uint64_t rsp1;

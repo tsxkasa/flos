@@ -55,7 +55,7 @@ static struct gdtr_t gdt = {
     (uintptr_t)gdt_descs,
 };
 
-static struct tss tss;
+static struct tss_t tss;
 
 void init_gdt(void) {
   // zeroes
