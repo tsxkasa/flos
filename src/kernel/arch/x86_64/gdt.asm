@@ -2,6 +2,7 @@ global _load_gdt
 
 ; void _load_gdt(struct gdtr_t *gdt);
 _load_gdt:
+  cli ; clear interrupt before setting up idt
   lgdt  [rdi] ; first arg in UNIX
 
   mov ax, 0x28 ; tss seg low
