@@ -73,5 +73,5 @@ void init_gdt(void) {
 
   _load_gdt(&gdt);
 
-  printk("GDT initialized.\n");
+  printk(LOG_INFO "GDT initialized.\n");
 }
