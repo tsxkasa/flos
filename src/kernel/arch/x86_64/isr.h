@@ -30,4 +30,8 @@ struct interrupt_frame {
   uint64_t ss;
 };
 
+typedef uint64_t interrupt_handler_t(struct interrupt_frame *frame);
+
+void register_interrupt_handler(uint8_t irq, void *handler);
+
 #endif // _KERNEL_ISR_H

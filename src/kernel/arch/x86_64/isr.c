@@ -1,8 +1,12 @@
-#include "drivers/pic/pic.h"
-#include "drivers/tty/tty.h"
 #include <isr.h>
 #include <kernel/printk.h>
 #include <stdint.h>
+
+static interrupt_handler_t *interrupt_handlers[256];
+
+void register_interrupt_handler(uint8_t vec, void *handler) {
+  interrupt_handlers[vec] = handler;
+}
 
 static const char *exceptions[] = {
     "#DE: Divide Error",
@@ -39,7 +43,18 @@ static const char *exceptions[] = {
     "— : Intel reserved. Do not use."};
 
 // __attribute__((interrupt))
-void interrupt_handler(struct interrupt_frame *frame) {
+uint64_t interrupt_handler(struct interrupt_frame *frame) {
+  uint64_t rsp = (uint64_t)frame;
+
+  interrupt_handler_t *handler = interrupt_handlers[frame->int_no];
+
+  if (handler) {
+    rsp = handler(frame);
+  } else {
+    printk(LOG_WARN "No interrupt handler is found for vector:%d\n",
+           frame->int_no);
+  }
+
   if (frame->int_no <= 31) {
     // tty_clear();
     printk(LOG_ERR "Exception occurred!\n\n");
@@ -63,11 +78,6 @@ void interrupt_handler(struct interrupt_frame *frame) {
 
     while (1)
       __asm__ volatile("cli; hlt");
-  } else if (frame->int_no >= 32 && frame->int_no <= 47) {
-    // keyboard IRQ check -> call handler
-    if (frame->int_no == 33)
-      // TODO:keyboard_irq_handler();
-
-      pic_signal_EOI(frame->int_no - 32);
   }
+  return rsp;
 }

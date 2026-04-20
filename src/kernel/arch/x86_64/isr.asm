@@ -45,11 +45,8 @@ _isr_handler:
 
   mov rdi, rsp
 
-  mov rbx, rsp
-  and rsp, -16        ; Align stack to a 16-byte boundary
-
   call interrupt_handler
-  mov rsp, rbx
+  mov rsp, rax ; return value
 
   popall64r
 

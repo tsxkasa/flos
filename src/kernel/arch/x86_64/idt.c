@@ -47,9 +47,6 @@ void init_idt() {
     vectors[vector] = true;
   }
 
-  // mask keyboard IRQ
-  pic_irq_set_mask(1);
-
   _load_idt(&idtr);
 
   printk(LOG_INFO "IDT initialized.\n");
