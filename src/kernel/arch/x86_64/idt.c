@@ -1,6 +1,6 @@
-#include "drivers/pic/pic.h"
 #include <idt.h>
 #include <kernel/printk.h>
+#include <pic/pic.h>
 #include <stdbool.h>
 #include <stdint.h>
 
