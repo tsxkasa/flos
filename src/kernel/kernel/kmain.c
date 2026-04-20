@@ -14,7 +14,6 @@ void kmain(void) {
   init_idt();
 
   printk("Hello kernel!\n");
-  printk("linked %s!\n", "libc");
 
   // We're done, just hang...
   hcf();

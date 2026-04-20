@@ -1,3 +1,4 @@
+#include "drivers/pic/pic.h"
 #include "drivers/tty/tty.h"
 #include <isr.h>
 #include <kernel/printk.h>
@@ -40,7 +41,7 @@ static const char *exceptions[] = {
 // __attribute__((interrupt))
 void interrupt_handler(struct interrupt_frame *frame) {
   if (frame->int_no <= 31) {
-    tty_clear();
+    // tty_clear();
     printk(LOG_ERR "Exception occurred!\n\n");
     printk(LOG_DEBUG "ISR- No. %d: %s\n", frame->int_no,
            exceptions[frame->int_no]);
@@ -62,5 +63,11 @@ void interrupt_handler(struct interrupt_frame *frame) {
 
     while (1)
       __asm__ volatile("cli; hlt");
+  } else if (frame->int_no >= 32 && frame->int_no <= 47) {
+    // keyboard IRQ check -> call handler
+    if (frame->int_no == 33)
+      // TODO:keyboard_irq_handler();
+
+      pic_signal_EOI(frame->int_no - 32);
   }
 }

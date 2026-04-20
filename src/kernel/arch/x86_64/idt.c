@@ -1,3 +1,4 @@
+#include "drivers/pic/pic.h"
 #include <idt.h>
 #include <kernel/printk.h>
 #include <stdbool.h>
@@ -11,7 +12,7 @@ static bool vectors[IDT_MAX_DESCRIPTORS];
 
 extern void _load_idt(struct idtr_t *idt);
 
-extern void *isr_stub_table[];
+extern void *_isr_stub_table[];
 
 static struct idtr_t idtr;
 
@@ -32,9 +33,22 @@ void init_idt() {
   idtr.limit = (uint16_t)sizeof(struct idt_desc) * IDT_MAX_DESCRIPTORS - 1;
 
   for (uint8_t vector = 0; vector < 32; vector++) {
-    idt_set_descriptor(vector, isr_stub_table[vector], 0x8E);
+    idt_set_descriptor(vector, _isr_stub_table[vector], 0x8E);
     vectors[vector] = true;
   }
+
+  // master (0-7) is moved to 32-39
+  // slave (8-15) is moved to 40-47
+  pic_remap(0x20, 0x28);
+
+  // maps irq 0-15 of pic to 32-47 idx
+  for (uint8_t vector = 32; vector < 48; vector++) {
+    idt_set_descriptor(vector, _isr_stub_table[vector], 0x8E);
+    vectors[vector] = true;
+  }
+
+  // mask keyboard IRQ
+  pic_irq_set_mask(1);
 
   _load_idt(&idtr);
 
