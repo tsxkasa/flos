@@ -1,4 +1,4 @@
-#include <drivers/video/psf_font.h>
+#include <drivers/video/font/psf_font.h>
 
 void psf_load(psf_font_t *font) {
   font->header = (psf2_header_t *)_binary_assets_font_psf_start;

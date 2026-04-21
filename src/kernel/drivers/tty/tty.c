@@ -1,7 +1,7 @@
 #include <boot/boot.h>
 #include <drivers/tty/tty.h>
-#include <drivers/video/framebuffer.h>
-#include <drivers/video/psf_font.h>
+#include <drivers/video/font/psf_font.h>
+#include <drivers/video/framebuffer/framebuffer.h>
 #include <stdint.h>
 
 // Global Terminal State

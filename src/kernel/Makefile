@@ -10,7 +10,7 @@ KERNEL_CFLAGS := $(CFLAGS) \
     -mno-80387 -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel \
     -nostdlib -fno-builtin
 
-KERNEL_CPPFLAGS := $(CPPFLAGS) -D__is_kernel -Iinclude/lib -I. -Iarch/$(HOSTARCH)
+KERNEL_CPPFLAGS := $(CPPFLAGS) -D__is_kernel -Iinclude -I. -Iarch/$(HOSTARCH)
 KERNEL_LDFLAGS := $(LDFLAGS) \
     -m elf_x86_64 -nostdlib -static -z max-page-size=0x1000 --gc-sections \
     -T linker.ld
