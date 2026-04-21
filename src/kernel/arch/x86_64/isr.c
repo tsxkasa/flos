@@ -4,7 +4,7 @@
 
 static interrupt_handler_t *interrupt_handlers[256];
 
-void register_interrupt_handler(uint8_t vec, void *handler) {
+void register_interrupt_handler(uint8_t vec, interrupt_handler_t *handler) {
   interrupt_handlers[vec] = handler;
 }
 
