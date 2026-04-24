@@ -18,6 +18,11 @@ __attribute__((
     section(".limine_requests"))) static volatile struct limine_memmap_request
     memmap_request = {.id = LIMINE_MEMMAP_REQUEST_ID, .revision = 0};
 
+__attribute__((
+    used,
+    section(".limine_requests"))) static volatile struct limine_hhdm_request
+    hhdm_request = {.id = LIMINE_HHDM_REQUEST_ID, .revision = 0};
+
 __attribute__((used,
                section(".limine_requests_start"))) static volatile uint64_t
     limine_requests_start_marker[] = LIMINE_REQUESTS_START_MARKER;
@@ -27,6 +32,7 @@ __attribute__((used, section(".limine_requests_end"))) static volatile uint64_t
 
 static framebuffer_t kernel_fb;
 static memory_map_t kernel_mmap;
+static uint64_t kernel_hhdm_offset;
 
 void boot_init(void) {
   if (!LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision))
@@ -35,6 +41,8 @@ void boot_init(void) {
       framebuffer_request.response->framebuffer_count < 1)
     hcf();
   if (!memmap_request.response || memmap_request.response->entry_count < 1)
+    hcf();
+  if (!hhdm_request.response)
     hcf();
 
   if (memmap_request.response->entry_count > MAX_MEMMAP_ENTRIES) {
@@ -58,6 +66,8 @@ void boot_init(void) {
     temp_entries[i].type = src->type;
   }
 
+  kernel_hhdm_offset = hhdm_request.response->offset;
+
   memmap_init(&kernel_mmap, temp_entries, count);
 
   // Translate once. The rest of the kernel never touches
@@ -69,3 +79,5 @@ void boot_init(void) {
 framebuffer_t *boot_get_framebuffer(void) { return &kernel_fb; }
 
 memory_map_t *boot_get_memmap(void) { return &kernel_mmap; }
+
+uint64_t boot_get_hhdm_offset(void) { return kernel_hhdm_offset; }
