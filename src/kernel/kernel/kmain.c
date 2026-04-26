@@ -4,6 +4,9 @@
 #include <gdt.h>
 #include <idt.h>
 #include <kernel/printk.h>
+#include <mm/pmm.h>
+
+#include <stdint.h>
 
 // entry point
 void kmain(void) {
@@ -12,6 +15,7 @@ void kmain(void) {
   tty_init();
   init_gdt();
   init_idt();
+  init_bitmap_pmm();
 
   printk("Hello kernel!\n");
 

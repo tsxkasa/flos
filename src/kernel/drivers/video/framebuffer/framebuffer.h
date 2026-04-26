@@ -1,6 +1,5 @@
 #ifndef _KERNEL_FRAMEBUFFER_H
 #define _KERNEL_FRAMEBUFFER_H
-#include <stddef.h>
 #include <stdint.h>
 
 typedef struct {

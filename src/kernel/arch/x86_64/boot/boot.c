@@ -1,4 +1,4 @@
-#include "mm/memory.h"
+#include "mm/mm_types.h"
 #include <boot/boot.h>
 #include <cpu/halt.h>
 #include <limine.h>
@@ -23,6 +23,10 @@ __attribute__((
     section(".limine_requests"))) static volatile struct limine_hhdm_request
     hhdm_request = {.id = LIMINE_HHDM_REQUEST_ID, .revision = 0};
 
+__attribute__((used, section(".limine_requests"))) static volatile struct
+    limine_executable_address_request kernel_addr_request = {
+        .id = LIMINE_EXECUTABLE_ADDRESS_REQUEST_ID, .revision = 0};
+
 __attribute__((used,
                section(".limine_requests_start"))) static volatile uint64_t
     limine_requests_start_marker[] = LIMINE_REQUESTS_START_MARKER;
@@ -33,6 +37,7 @@ __attribute__((used, section(".limine_requests_end"))) static volatile uint64_t
 static framebuffer_t kernel_fb;
 static memory_map_t kernel_mmap;
 static uint64_t kernel_hhdm_offset;
+static kernel_addr_t executable_code;
 
 void boot_init(void) {
   if (!LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision))
@@ -43,6 +48,8 @@ void boot_init(void) {
   if (!memmap_request.response || memmap_request.response->entry_count < 1)
     hcf();
   if (!hhdm_request.response)
+    hcf();
+  if (!kernel_addr_request.response)
     hcf();
 
   if (memmap_request.response->entry_count > MAX_MEMMAP_ENTRIES) {
@@ -68,6 +75,11 @@ void boot_init(void) {
 
   kernel_hhdm_offset = hhdm_request.response->offset;
 
+  kernel_addr_t a = {.phys = kernel_addr_request.response->physical_base,
+                     .virt = kernel_addr_request.response->virtual_base};
+
+  executable_code = a;
+
   memmap_init(&kernel_mmap, temp_entries, count);
 
   // Translate once. The rest of the kernel never touches
@@ -81,3 +93,5 @@ framebuffer_t *boot_get_framebuffer(void) { return &kernel_fb; }
 memory_map_t *boot_get_memmap(void) { return &kernel_mmap; }
 
 uint64_t boot_get_hhdm_offset(void) { return kernel_hhdm_offset; }
+
+kernel_addr_t boot_get_executable_addr(void) { return executable_code; }

@@ -1,4 +1,4 @@
-#include <mm/memory.h>
+#include <mm/memory_map.h>
 
 void memmap_init(memory_map_t *map, memory_map_entry_t *entries,
                  uint64_t entry_count) {

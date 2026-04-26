@@ -2,7 +2,8 @@
 #define BOOT_H
 
 #include <drivers/video/framebuffer/framebuffer.h>
-#include <mm/memory.h>
+#include <mm/memory_map.h>
+#include <mm/mm_types.h>
 #include <stdint.h>
 
 // Populates kernel abstractions from bootloader responses.
@@ -15,5 +16,7 @@ framebuffer_t *boot_get_framebuffer(void);
 memory_map_t *boot_get_memmap(void);
 
 uint64_t boot_get_hhdm_offset(void);
+
+kernel_addr_t boot_get_executable_addr(void);
 
 #endif // BOOT_H
