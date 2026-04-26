@@ -18,7 +18,14 @@ static uint64_t cached_index = 0;
 void init_bitmap_pmm() {
   memory_map_t *map = boot_get_memmap();
 
+  // for (int i = 0; i < map->entry_count; i++) {
+  //   memory_map_entry_t *e = &map->entries[i];
+  //   printk("base=%p len=%p type=%d\n", e->base, e->length, e->type);
+  // }
+
   uint64_t highest_addr = 0;
+
+  uint64_t total_usable = 0;
 
   for (int i = 0; i < (int)map->entry_count; i++) {
     memory_map_entry_t *e = &map->entries[i];
@@ -28,10 +35,14 @@ void init_bitmap_pmm() {
     uint64_t top = e->base + e->length;
     if (top > highest_addr)
       highest_addr = top;
+
+    if (e->type == MEMMAP_USABLE) {
+      total_usable += e->length;
+    }
   }
 
-  pmm_map.memory_size = highest_addr;
-  pmm_map.total_pages = BYTES_TO_PAGES(highest_addr);
+  pmm_map.memory_size = total_usable;
+  pmm_map.total_pages = BYTES_TO_PAGES(total_usable);
 
   uint64_t bitmap_size = ALIGN_UP((pmm_map.total_pages + 7) / 8, PAGE_SIZE);
   pmm_map.bitmap.size = bitmap_size;
@@ -100,7 +111,7 @@ uintptr_t pmm_alloc_page() {
     }
   }
 
-  printk(LOG_ERR "pmm: OUT OF MEMORY!");
+  printk(LOG_ERR "pmm: OUT OF MEMORY!\n");
   return 0;
 }
 
