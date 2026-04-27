@@ -3,13 +3,13 @@
 #include <kernel/bitmap.h>
 #include <kernel/printk.h>
 #include <kernel/string.h>
+#include <limits.h>
 #include <mm/memory.h>
 #include <mm/memory_map.h>
 #include <mm/pmm.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-
-#include <stddef.h>
 
 struct bitmap_pmm pmm_map;
 
@@ -18,15 +18,7 @@ static uint64_t cached_index = 0;
 void init_bitmap_pmm() {
   memory_map_t *map = boot_get_memmap();
 
-  // for (int i = 0; i < map->entry_count; i++) {
-  //   memory_map_entry_t *e = &map->entries[i];
-  //   printk("base=%p len=%p type=%d\n", e->base, e->length, e->type);
-  // }
-
   uint64_t highest_addr = 0;
-
-  uint64_t total_usable = 0;
-
   for (int i = 0; i < (int)map->entry_count; i++) {
     memory_map_entry_t *e = &map->entries[i];
     if (e->type != MEMMAP_USABLE)
@@ -35,31 +27,26 @@ void init_bitmap_pmm() {
     uint64_t top = e->base + e->length;
     if (top > highest_addr)
       highest_addr = top;
-
-    if (e->type == MEMMAP_USABLE) {
-      total_usable += e->length;
-    }
   }
 
-  pmm_map.memory_size = total_usable;
-  pmm_map.total_pages = BYTES_TO_PAGES(total_usable);
+  pmm_map.max_addressable = highest_addr;
+  pmm_map.total_pages = BYTES_TO_PAGES(highest_addr);
 
   uint64_t bitmap_size = ALIGN_UP((pmm_map.total_pages + 7) / 8, PAGE_SIZE);
   pmm_map.bitmap.size = bitmap_size;
-
   pmm_map.bitmap.map = NULL;
 
-  uintptr_t bitmap_phys_addr = 0;
+  uintptr_t bitmap_phys_addr =
+      ULONG_MAX; // no way physical address reaches this point lol
   for (int i = 0; i < (int)map->entry_count; i++) {
     memory_map_entry_t *e = &map->entries[i];
-    if (e->type == MEMMAP_USABLE && e->length >= pmm_map.bitmap.size &&
-        e->base != 0) {
+    if (e->type == MEMMAP_USABLE && e->length >= pmm_map.bitmap.size) {
       bitmap_phys_addr = e->base;
       break;
     }
   }
 
-  if (!bitmap_phys_addr) {
+  if (bitmap_phys_addr == ULONG_MAX) {
     printk(LOG_ERR "pmm: no usable region large enough to hold bitmap");
     hcf();
   }
@@ -81,16 +68,28 @@ void init_bitmap_pmm() {
           addr < bitmap_phys_addr + pmm_map.bitmap.size) {
         continue;
       }
-
-      // If bootloader dont reserve kernel addr automatically have to check here
-
       pmm_free_page(addr);
     }
   }
 
   bitmap_set_bit(&pmm_map.bitmap, 0);
 
+  for (int i = 0; i < map->entry_count; i++) {
+    memory_map_entry_t *e = &map->entries[i];
+    // Convert base and length to MB for human readability
+    uint64_t base_mb = e->base / (1024 * 1024);
+    uint64_t len_mb = e->length / (1024 * 1024);
+
+    printk("Base: %llu MB | Length: %llu MB | Type: %d\n", base_mb, len_mb,
+           e->type);
+  }
+
   printk(LOG_INFO "Bitmap PMM initialized.\n");
+
+  // for (int i = 0; i < (int)pmm_map.bitmap.size; i++) {
+  //   printk("%i", pmm_map.bitmap.map[i]);
+  // }
+  // printk("\n");
 }
 
 uintptr_t pmm_alloc_page() {

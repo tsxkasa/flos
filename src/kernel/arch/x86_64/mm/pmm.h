@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 struct bitmap_pmm {
-  uint64_t memory_size;
+  uint64_t max_addressable;
   bitmap_t bitmap;
   uint64_t total_pages;
 };
