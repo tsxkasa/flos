@@ -2,9 +2,17 @@
 #include <drivers/tty/tty.h>
 #include <drivers/video/font/psf_font.h>
 #include <drivers/video/framebuffer/framebuffer.h>
+#include <kernel/string.h>
 #include <stdint.h>
 
-// Global Terminal State
+#define MAX_ROWS 512
+
+static char tty_buffer[MAX_ROWS][256];
+static uint32_t tty_row = 0;
+static uint32_t view_row = 0;
+static uint32_t cols = 0;
+static uint32_t rows = 0;
+
 static framebuffer_t *term_fb;
 static psf_font_t term_font;
 static uint32_t term_cx = 0;
@@ -29,57 +37,107 @@ static void draw_glyph(unsigned char c, uint64_t px, uint64_t py) {
   }
 }
 
+static void tty_redraw(void) {
+  fb_clear(term_fb, term_bg);
+  psf2_header_t *h = term_font.header;
+
+  for (uint32_t row = 0; row < rows; row++) {
+    uint32_t buf_row = (view_row + row) % MAX_ROWS;
+    char *line = tty_buffer[buf_row];
+
+    for (uint32_t col = 0; col < cols; col++) {
+      char c = line[col];
+      if (!c)
+        continue;
+      draw_glyph(c, col * h->width, row * h->height);
+    }
+  }
+}
+
 void tty_init(void) {
   term_fb = boot_get_framebuffer();
   psf_load(&term_font);
+
+  cols = term_fb->width / term_font.header->width;
+  rows = term_fb->height / term_font.header->height;
+
   term_cx = 0;
-  term_cy = 0;
+  tty_row = 0;
+  view_row = 0;
+
+  memset(tty_buffer, 0, sizeof(tty_buffer));
   fb_clear(term_fb, term_bg);
 }
 
+void tty_scroll_down(void) {
+  if (view_row + rows < tty_row) {
+    view_row++;
+    tty_redraw();
+  }
+}
+
+void tty_scroll_up(void) {
+  if (view_row > 0) {
+    view_row--;
+    tty_redraw();
+  }
+}
+
 void tty_putchar(char c) {
-  psf2_header_t *header = term_font.header;
-  uint32_t cols = term_fb->width / header->width;
-  uint32_t rows = term_fb->height / header->height;
+  psf2_header_t *h = term_font.header;
+  char *line = tty_buffer[tty_row % MAX_ROWS];
 
   if (c == '\n') {
+    tty_row++;
     term_cx = 0;
-    term_cy++;
+
+    memset(tty_buffer[tty_row % MAX_ROWS], 0, cols);
+
+    if (tty_row - view_row >= rows) {
+      view_row++;
+      tty_redraw();
+    }
+
   } else if (c == '\r') {
     term_cx = 0;
+
   } else if (c == '\b') {
-    if (term_cx > 0)
+    if (term_cx > 0) {
       term_cx--;
-    draw_glyph(' ', term_cx * header->width, term_cy * header->height);
+      line[term_cx] = ' ';
+
+      uint32_t vis_row = tty_row - view_row;
+      if (vis_row < rows)
+        draw_glyph(' ', term_cx * h->width, vis_row * h->height);
+    }
+
   } else {
-    draw_glyph((unsigned char)c, term_cx * header->width,
-               term_cy * header->height);
-    term_cx++;
-  }
+    if (term_cx < cols) {
+      line[term_cx] = c;
 
-  // Wrap text
-  if (term_cx >= cols) {
-    term_cx = 0;
-    term_cy++;
-  }
+      uint32_t vis_row = tty_row - view_row;
+      if (vis_row < rows)
+        draw_glyph(c, term_cx * h->width, vis_row * h->height);
 
-  // TODO: scroll line
-  if (term_cy >= rows) {
-    term_cy = 0;
-    fb_clear(term_fb, term_bg);
+      term_cx++;
+    }
   }
 }
 
 void tty_write(const char *data, size_t size) {
-  for (size_t i = 0; i < size; i++) {
+  for (size_t i = 0; i < size; i++)
     tty_putchar(data[i]);
-  }
 }
 
 void tty_writestring(const char *data) {
-  while (*data) {
+  while (*data)
     tty_putchar(*data++);
-  }
 }
 
-void tty_clear(void) { fb_clear(term_fb, term_bg); }
+void tty_clear(void) {
+  memset(tty_buffer, 0, sizeof(tty_buffer));
+  tty_row = 0;
+  view_row = 0;
+  term_cx = 0;
+  fb_clear(term_fb, term_bg);
+}
