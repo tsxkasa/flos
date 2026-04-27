@@ -79,17 +79,9 @@ void init_bitmap_pmm() {
     // Convert base and length to MB for human readability
     uint64_t base_mb = e->base / (1024 * 1024);
     uint64_t len_mb = e->length / (1024 * 1024);
-
-    printk("Base: %llu MB | Length: %llu MB | Type: %d\n", base_mb, len_mb,
-           e->type);
   }
 
   printk(LOG_INFO "Bitmap PMM initialized.\n");
-
-  // for (int i = 0; i < (int)pmm_map.bitmap.size; i++) {
-  //   printk("%i", pmm_map.bitmap.map[i]);
-  // }
-  // printk("\n");
 }
 
 uintptr_t pmm_alloc_page() {
