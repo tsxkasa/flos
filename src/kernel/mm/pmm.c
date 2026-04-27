@@ -4,8 +4,9 @@
 #include <kernel/printk.h>
 #include <kernel/string.h>
 #include <limits.h>
-#include <mm/memory.h>
+#include <mm/address.h>
 #include <mm/memory_map.h>
+#include <mm/page.h>
 #include <mm/pmm.h>
 #include <stddef.h>
 #include <stdint.h>
