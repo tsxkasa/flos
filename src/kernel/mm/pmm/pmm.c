@@ -6,8 +6,8 @@
 #include <limits.h>
 #include <mm/address.h>
 #include <mm/memory_map.h>
-#include <mm/page.h>
-#include <mm/pmm.h>
+#include <mm/mm_types.h>
+#include <mm/pmm/pmm.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
