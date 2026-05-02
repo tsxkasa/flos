@@ -153,6 +153,37 @@ bool pmap_map_page(struct page_table_t *table, uintptr_t virt, uintptr_t phys,
   return true;
 }
 
+bool pmap_map_page_2m(struct page_table_t *table, uintptr_t virt,
+                      uintptr_t phys, uint32_t flags) {
+  uint64_t arch_flags = PAGE_PRESENT | PAGE_HUGE; // Notice PAGE_HUGE
+  if (flags & MMU_FLAG_WRITE)
+    arch_flags |= PAGE_RW;
+  if (flags & MMU_FLAG_USER)
+    arch_flags |= PAGE_USER;
+  if (flags & MMU_FLAG_NO_EXEC)
+    arch_flags |= PAGE_XD;
+
+  uint16_t pml4_idx = GET_PML4_IDX(virt);
+  uint16_t pdpt_idx = GET_PDPT_IDX(virt);
+  uint16_t pd_idx = GET_PD_IDX(virt);
+
+  uint64_t *pdpt = get_next_level(table->pml4_virt, pml4_idx, 1);
+  if (!pdpt)
+    return false;
+
+  uint64_t *pd = get_next_level(pdpt, pdpt_idx, 1);
+  if (!pd)
+    return false;
+
+  // We write the physical address directly into the Page Directory
+  pd[pd_idx] = phys | arch_flags;
+
+  // Optional: only invalidate if this table is active
+  asm volatile("invlpg (%0)" : : "r"(virt) : "memory");
+
+  return true;
+}
+
 uintptr_t pmap_unmap_page(struct page_table_t *table, uintptr_t virt) {
   uint16_t pml4_idx = GET_PML4_IDX(virt);
   uint16_t pdpt_idx = GET_PDPT_IDX(virt);

@@ -20,6 +20,8 @@ void init_pmap(void);
 void pmap_destroy_table(struct page_table_t *table);
 bool pmap_map_page(struct page_table_t *table, uintptr_t virt, uintptr_t phys,
                    uint32_t flags);
+bool pmap_map_page_2m(struct page_table_t *table, uintptr_t virt,
+                      uintptr_t phys, uint32_t flags);
 uintptr_t pmap_unmap_page(struct page_table_t *table, uintptr_t virt);
 void pmap_switch(struct page_table_t *table);
 

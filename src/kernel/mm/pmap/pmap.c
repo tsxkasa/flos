@@ -61,11 +61,23 @@ void init_pmap(void) {
     if (e->type == MEMMAP_BAD_MEMORY)
       continue;
 
-    for (uint64_t off = 0; off < e->length; off += PAGE_SIZE) {
-      uintptr_t phys = e->base + off;
+    uintptr_t phys = e->base;
+    uintptr_t end = phys + e->length;
+
+    while (phys < end) {
       uintptr_t virt = phys_to_higher_half_data(phys);
-      pmap_map_page(kernel_page_table, virt, phys,
-                    MMU_FLAG_WRITE | MMU_FLAG_NO_EXEC);
+      size_t remain = end - phys;
+
+      if ((phys % PAGE_SIZE_2M == 0) && (virt % PAGE_SIZE_2M == 0) &&
+          remain >= PAGE_SIZE_2M) {
+        pmap_map_page_2m(kernel_page_table, virt, phys,
+                         MMU_FLAG_WRITE | MMU_FLAG_NO_EXEC);
+        phys += PAGE_SIZE_2M;
+      } else {
+        pmap_map_page(kernel_page_table, virt, phys,
+                      MMU_FLAG_WRITE | MMU_FLAG_NO_EXEC);
+        phys += PAGE_SIZE;
+      }
     }
   }
 
