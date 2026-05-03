@@ -4,9 +4,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
+struct kmem_cache;
+
 struct slab_t {
   void *freelist;
   struct slab_t *next;
+
+  struct kmem_cache *cache;
+
   uint16_t inuse;
   uint16_t objects;
 };

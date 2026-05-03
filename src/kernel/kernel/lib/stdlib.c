@@ -1,66 +1,60 @@
 #include <kernel/printk.h>
 #include <kernel/stdlib.h>
+#include <mm/mm_types.h>
 #include <mm/vm/slab.h>
+#include <stddef.h>
 
-#define KMALLOC_MIN_SHIFT 3
-#define KMALLOC_MAX_SHIFT 12
+static size_t kmalloc_sizes[] = {8,   16,  24,  32,  40,  48,   56,   64,  80,
+                                 96,  112, 128, 160, 192, 224,  256,  320, 384,
+                                 448, 512, 640, 768, 896, 1024, 2048, 4096};
 
-struct kmalloc_hdr {
-  struct kmem_cache *cache;
-} __attribute__((aligned(sizeof(void *))));
-
-static struct kmem_cache *kmalloc_caches[KMALLOC_MAX_SHIFT + 1];
-
-static inline size_t ceil_log2(size_t x) {
-  size_t r = 0;
-  x--;
-  while (x > 0) {
-    x >>= 1;
-    r++;
-  }
-  return r;
-}
+#define KMALLOC_NUM_SIZES (sizeof(kmalloc_sizes) / sizeof(size_t))
+static struct kmem_cache *kmalloc_caches[KMALLOC_NUM_SIZES];
 
 void init_kmalloc(void) {
-  for (int i = KMALLOC_MIN_SHIFT; i <= KMALLOC_MAX_SHIFT; i++) {
-    size_t size = 1 << i;
-
-    kmalloc_caches[i] = kmem_cache_create(size);
+  for (size_t i = 0; i < KMALLOC_NUM_SIZES; i++) {
+    kmalloc_caches[i] = kmem_cache_create(kmalloc_sizes[i]);
   }
 
   printk(LOG_INFO "kmalloc initialized\n");
 }
 
-void *kmalloc(int size) {
+static int kmalloc_index(size_t size) {
+  int left = 0;
+  int right = KMALLOC_NUM_SIZES - 1;
+  int result = -1;
+
+  while (left <= right) {
+    int mid = (left + right) / 2;
+
+    if (kmalloc_sizes[mid] >= size) {
+      result = mid;
+      right = mid - 1;
+    } else {
+      left = mid + 1;
+    }
+  }
+
+  return result;
+}
+
+void *kmalloc(unsigned int size) {
   if (size == 0)
     return NULL;
 
-  size_t total = size + sizeof(struct kmalloc_hdr);
-
-  size_t shift = ceil_log2(total);
-  if (shift < KMALLOC_MIN_SHIFT)
-    shift = KMALLOC_MIN_SHIFT;
-
-  if (shift > KMALLOC_MAX_SHIFT) {
+  int idx = kmalloc_index(size);
+  if (idx < 0) {
     return NULL;
   }
 
-  struct kmem_cache *cache = kmalloc_caches[shift];
-  struct kmalloc_hdr *hdr = kmem_cache_alloc(cache);
-
-  if (!hdr)
-    return NULL;
-
-  hdr->cache = cache;
-
-  return (void *)(hdr + 1);
+  return kmem_cache_alloc(kmalloc_caches[idx]);
 }
 
 void kfree(void *ptr) {
   if (!ptr)
     return;
 
-  struct kmalloc_hdr *hdr = ((struct kmalloc_hdr *)ptr) - 1;
+  struct slab_t *slab = (struct slab_t *)((uintptr_t)ptr & ~(PAGE_SIZE - 1));
 
-  kmem_cache_free(hdr->cache, hdr);
+  kmem_cache_free(slab->cache, ptr);
 }

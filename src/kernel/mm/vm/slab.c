@@ -29,6 +29,7 @@ static struct slab_t *alloc_new_slab(struct kmem_cache *s) {
   slab->freelist = start;
   slab->next = NULL;
   slab->inuse = 0;
+  slab->cache = s;
   slab->objects = (uint16_t)n;
 
   s->obj_per_slab = n;
