@@ -15,6 +15,9 @@
 
 #include <pic/pic.h>
 
+#include <kernel/string.h>
+
+#include <stddef.h>
 #include <stdint.h>
 
 #define IA32_APIC_BASE_MSR 0x1B
