@@ -13,8 +13,8 @@ struct bitmap_pmm {
 
 void init_bitmap_pmm();
 uintptr_t pmm_alloc_page();
-uintptr_t pmm_alloc_page_count(size_t count);
+uintptr_t pmm_alloc_pages(size_t count);
 void pmm_free_page(uintptr_t addr);
-void pmm_free_page_count(uintptr_t addr, size_t count);
+void pmm_free_pages(uintptr_t addr, size_t count);
 
 #endif // _KERNEL_PMM_H

@@ -78,7 +78,7 @@ void init_bitmap_pmm() {
   printk(LOG_INFO "Bitmap PMM initialized.\n");
 }
 
-uintptr_t pmm_alloc_page_count(size_t count) {
+uintptr_t pmm_alloc_pages(size_t count) {
   if (count == 0)
     return NULL;
 
@@ -129,7 +129,7 @@ uintptr_t pmm_alloc_page() {
   return 0;
 }
 
-void pmm_free_page_count(uintptr_t phys_addr, size_t count) {
+void pmm_free_pages(uintptr_t phys_addr, size_t count) {
   if (count == 0)
     return;
   uint64_t index = phys_addr / PAGE_SIZE;
