@@ -4,6 +4,7 @@
 #include <mm/address.h>
 #include <mm/pmap/pmap.h>
 #include <mm/pmm/pmm.h>
+#include <mm/vm/slab.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -27,7 +28,13 @@ struct page_table_t {
   uintptr_t pml4_phy;
 };
 
+static struct kmem_cache *page_table_cache;
+
 struct page_table_t *pmap_create_table(void) {
+  if (!page_table_cache) {
+    page_table_cache = kmem_cache_create(sizeof(struct page_table_t));
+  }
+
   uintptr_t phys = pmm_alloc_page();
   if (!phys) {
     printk(LOG_ERR "paging: failed to allocate PML4\n");
@@ -43,15 +50,23 @@ struct page_table_t *pmap_create_table(void) {
     }
   }
 
-  uintptr_t table_phys = pmm_alloc_page();
-  if (!table_phys) {
-    printk(LOG_ERR "paging: failed to allocate page_table_t struct\n");
+  // uintptr_t table_phys = pmm_alloc_page();
+  // if (!table_phys) {
+  //   printk(LOG_ERR "paging: failed to allocate page_table_t struct\n");
+  //   pmm_free_page(phys);
+  //   return NULL;
+  // }
+  //
+  // struct page_table_t *table =
+  //     (struct page_table_t *)phys_to_higher_half_data(table_phys);
+  // memset(table, 0, sizeof(*table));
+
+  struct page_table_t *table = kmem_cache_alloc(page_table_cache);
+  if (!table) {
     pmm_free_page(phys);
     return NULL;
   }
 
-  struct page_table_t *table =
-      (struct page_table_t *)phys_to_higher_half_data(table_phys);
   memset(table, 0, sizeof(*table));
 
   table->pml4_virt = virt;
@@ -92,7 +107,7 @@ void pmap_destroy_table(struct page_table_t *table) {
 
   pmm_free_page(table->pml4_phy);
 
-  pmm_free_page(higher_half_data_to_phys((uintptr_t)table));
+  kmem_cache_free(page_table_cache, table);
 }
 
 static uint64_t *get_next_level(uint64_t *current_table, uint16_t index,

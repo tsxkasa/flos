@@ -55,6 +55,7 @@ void kmain(void) {
   disable_lapic();
 
   init_bitmap_pmm();
+  init_vm();
   init_pmap();
 
   register_interrupt_handler(0x20 + 0x00, timer_irq_handler);

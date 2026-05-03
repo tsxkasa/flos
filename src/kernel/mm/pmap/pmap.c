@@ -6,6 +6,7 @@
 #include <mm/address.h>
 #include <mm/memory_map.h>
 #include <mm/pmap/pmap.h>
+#include <mm/vm/slab.h>
 #include <stddef.h>
 #include <stdint.h>
 

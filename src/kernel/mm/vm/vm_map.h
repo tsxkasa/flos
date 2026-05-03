@@ -12,6 +12,7 @@ typedef struct vm_map {
   vm_area_t *areas;
 } vm_map_t;
 
+void init_vm(void);
 vm_map_t *vm_map_create();
 void vm_map_destroy(vm_map_t *map);
 

@@ -6,31 +6,20 @@
 #include <kernel/string.h>
 #include <mm/address.h>
 #include <mm/pmm/pmm.h>
+#include <mm/vm/slab.h>
 #include <mm/vm/vm_map.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
-static void *_alloc_struct(size_t size) {
-  // TODO: slab
-  uintptr_t phys = pmm_alloc_page();
-  if (!phys)
-    return NULL;
-  void *virt = (void *)phys_to_higher_half_data(phys);
-  memset(virt, 0, size);
-  return virt;
-}
-
-static void _free_struct(void *ptr) {
-  if (!ptr)
-    return;
-  pmm_free_page(higher_half_data_to_phys((uintptr_t)ptr));
-}
+static struct kmem_cache *vm_area_cache;
+static struct kmem_cache *vm_map_cache;
 
 static vm_area_t *vma_alloc(uintptr_t start, uintptr_t end, uint32_t flags) {
-  vm_area_t *vma = _alloc_struct(sizeof(vm_area_t));
+  vm_area_t *vma = kmem_cache_alloc(vm_area_cache);
   if (!vma)
     return NULL;
+  memset(vma, 0, sizeof(*vma));
   vma->start = start;
   vma->end = end;
   vma->flags = flags;
@@ -55,17 +44,26 @@ static void insert_vma(vm_map_t *space, vm_area_t *new_vma) {
   *pp = new_vma;
 }
 
+void init_vm(void) {
+  if (!vm_area_cache)
+    vm_area_cache = kmem_cache_create(sizeof(vm_area_t));
+  if (!vm_map_cache)
+    vm_map_cache = kmem_cache_create(sizeof(vm_map_t));
+}
+
 vm_map_t *vm_map_create(void) {
-  vm_map_t *space = _alloc_struct(sizeof(vm_map_t));
+  vm_map_t *space = kmem_cache_alloc(vm_map_cache);
   if (!space) {
     printk(LOG_ERR "vm_map: failed to allocate address_space_t\n");
     return NULL;
   }
 
+  memset(space, 0, sizeof(*space));
+
   space->page_table = pmap_create_table();
   if (!space->page_table) {
     printk(LOG_ERR "vm_map: failed to create page table\n");
-    _free_struct(space);
+    kmem_cache_free(vm_map_cache, space);
     return NULL;
   }
 
@@ -85,12 +83,12 @@ void vm_map_destroy(vm_map_t *map) {
       if (pa)
         pmm_free_page(pa);
     }
-    _free_struct(vma);
+    kmem_cache_free(vm_area_cache, vma);
     vma = next;
   }
 
   pmap_destroy_table(map->page_table);
-  _free_struct(map);
+  kmem_cache_free(vm_map_cache, map);
 }
 
 bool vm_map_allocate_region(vm_map_t *space, uintptr_t start, size_t size,
@@ -141,7 +139,7 @@ void vm_map_free_region(vm_map_t *space, uintptr_t start, size_t size) {
 
     if (vma->start >= start && vma->end <= end) {
       *pp = vma->next;
-      _free_struct(vma);
+      kmem_cache_free(vm_area_cache, vma);
       continue;
     }
 
