@@ -2,6 +2,7 @@
 #include <drivers/tty/tty.h>
 #include <drivers/video/font/psf_font.h>
 #include <drivers/video/framebuffer/framebuffer.h>
+#include <kernel/printk.h>
 #include <kernel/string.h>
 #include <stdint.h>
 
@@ -140,4 +141,13 @@ void tty_clear(void) {
   view_row = 0;
   term_cx = 0;
   fb_clear(term_fb, term_bg);
+}
+
+void tty_flush(void) {
+  char buf[128];
+  int n;
+
+  while ((n = printk_read_buf(buf, sizeof(buf))) > 0) {
+    tty_write(buf, n);
+  }
 }

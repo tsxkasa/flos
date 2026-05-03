@@ -9,6 +9,7 @@ void tty_putchar(char c);
 void tty_write(const char *data, size_t size);
 void tty_writestring(const char *data);
 void tty_clear(void);
+void tty_flush(void);
 
 void tty_scroll_down(void);
 void tty_scroll_up(void);
