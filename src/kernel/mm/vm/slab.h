@@ -32,8 +32,6 @@ struct kmem_cache {
   struct kmem_cache_cpu cpu;
 };
 
-#define SLAB_ALIGN(x, a) (((x) + (a) - 1) & ~((a) - 1))
-
 struct kmem_cache *kmem_cache_create(size_t obj_size);
 void *kmem_cache_alloc(struct kmem_cache *s);
 void kmem_cache_free(struct kmem_cache *s, void *obj);

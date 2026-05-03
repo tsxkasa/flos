@@ -5,7 +5,6 @@
 #include <kernel/string.h>
 #include <limits.h>
 #include <mm/address.h>
-#include <mm/memory_map.h>
 #include <mm/mm_types.h>
 #include <mm/pmm/pmm.h>
 #include <stddef.h>
@@ -80,7 +79,7 @@ void init_bitmap_pmm() {
 
 uintptr_t pmm_alloc_pages(size_t count) {
   if (count == 0)
-    return NULL;
+    return 0;
 
   uint64_t run_start = 0;
   size_t run_length = 0;

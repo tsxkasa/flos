@@ -1,3 +1,4 @@
+#include <kernel/kassert.h>
 #include <kernel/string.h>
 #include <mm/address.h>
 #include <mm/mm_types.h>
@@ -18,8 +19,9 @@ static struct slab_t *alloc_new_slab(struct kmem_cache *s) {
 
   struct slab_t *slab = (struct slab_t *)phys_to_higher_half_data(phys);
 
-  size_t hdr = SLAB_ALIGN(sizeof(struct slab_t), s->size);
+  size_t hdr = ALIGN_UP(sizeof(struct slab_t), sizeof(void *));
   size_t n = (PAGE_SIZE - hdr) / s->size;
+  kassert(n > 0);
   char *start = (char *)slab + hdr;
 
   for (size_t i = 0; i < n - 1; i++)
@@ -65,9 +67,9 @@ struct kmem_cache *kmem_cache_create(size_t obj_size) {
     return NULL;
 
   s->obj_size = obj_size;
-  s->size = SLAB_ALIGN(obj_size, sizeof(void *));
+  s->size = ALIGN_UP(obj_size, sizeof(void *));
 
-  size_t hdr = SLAB_ALIGN(sizeof(struct slab_t), sizeof(void *));
+  size_t hdr = ALIGN_UP(sizeof(struct slab_t), sizeof(void *));
   s->obj_per_slab = (PAGE_SIZE - hdr) / s->size;
 
   s->partial = NULL;

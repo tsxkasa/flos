@@ -13,9 +13,6 @@
 #define MEMMAP_FRAMEBUFFER 7
 #define MEMMAP_RESERVED_MAPPED 8
 
-#define ALIGN_DOWN(addr, align) ((addr) & ~((align) - 1))
-#define ALIGN_UP(addr, align) (((addr) + (align) - 1) & ~((align) - 1))
-
 #define MAX_MEMMAP_ENTRIES 256
 
 typedef struct {

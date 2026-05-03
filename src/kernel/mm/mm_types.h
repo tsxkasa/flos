@@ -9,6 +9,9 @@
 #define KB_TO_PAGES(kb) (((kb) * 1024) / PAGE_SIZE)
 #define BYTES_TO_PAGES(bytes) ((bytes) / PAGE_SIZE)
 
+#define ALIGN_DOWN(addr, align) ((addr) & ~((align) - 1))
+#define ALIGN_UP(addr, align) (((addr) + (align) - 1) & ~((align) - 1))
+
 #define IS_PAGE_ALIGNED(num) (((num) & (PAGE_SIZE - 1)) == 0)
 
 #define VM_ALLOC_BASE 0x1000
