@@ -7,4 +7,4 @@
   }
 }
 
-#endif // K_HALT_H
+#endif // _KERNEL_HALT_H
