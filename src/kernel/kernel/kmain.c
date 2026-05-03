@@ -47,7 +47,6 @@ static uint64_t timer_irq_handler(struct interrupt_frame *frame) {
 
 // entry point
 void kmain(void) {
-  // asm volatile("int3"); // DEBUG
   boot_init();
   tty_init();
   init_gdt();
