@@ -8,6 +8,7 @@
 #include <kernel/printk.h>
 
 #include <kernel/kassert.h>
+#include <kernel/stdlib.h>
 #include <mm/pmap/pmap.h>
 #include <mm/pmm/pmm.h>
 #include <mm/vm/vm_map.h>
@@ -57,6 +58,8 @@ void kmain(void) {
   init_bitmap_pmm();
   init_vm();
   init_pmap();
+
+  init_kmalloc();
 
   register_interrupt_handler(0x20 + 0x00, timer_irq_handler);
   init_keyboard();
