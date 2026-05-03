@@ -7,7 +7,7 @@
 #include <interrupts/isr.h>
 #include <kernel/printk.h>
 
-#include <kernel/assert.h>
+#include <kernel/kassert.h>
 #include <mm/pmap/pmap.h>
 #include <mm/pmm/pmm.h>
 #include <mm/vm/vm_map.h>
