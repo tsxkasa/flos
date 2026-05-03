@@ -16,8 +16,8 @@
                                               const char *file,
                                               unsigned int line,
                                               const char *fun) {
-  printk(LOG_ERR "%s:%u: Assertion '%s' failed.\n\t In file: %s", fun, line,
-         expr, file);
+  printk(LOG_ERR "In file: %s, %s:%u: Assertion '%s' failed.\n", file, fun,
+         line, expr);
   hcf();
 }
 
