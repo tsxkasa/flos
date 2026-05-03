@@ -75,14 +75,36 @@ void init_bitmap_pmm() {
 
   bitmap_set_bit(&pmm_map.bitmap, 0);
 
-  for (int i = 0; i < map->entry_count; i++) {
-    memory_map_entry_t *e = &map->entries[i];
-    // Convert base and length to MB for human readability
-    uint64_t base_mb = e->base / (1024 * 1024);
-    uint64_t len_mb = e->length / (1024 * 1024);
+  printk(LOG_INFO "Bitmap PMM initialized.\n");
+}
+
+uintptr_t pmm_alloc_page_count(size_t count) {
+  if (count == 0)
+    return NULL;
+
+  uint64_t run_start = 0;
+  size_t run_length = 0;
+
+  for (uint64_t i = cached_index; i < pmm_map.total_pages; i++) {
+    if (!bitmap_check_bit(&pmm_map.bitmap, i)) {
+      if (run_length == 0) {
+        run_start = i;
+      }
+      run_length++;
+      if (run_length == count) {
+        for (uint64_t j = 0; j < count; j++) {
+          bitmap_set_bit(&pmm_map.bitmap, run_start + j);
+        }
+        cached_index = run_start + count;
+        return (uintptr_t)(run_start * PAGE_SIZE);
+      }
+    } else {
+      run_length = 0;
+    }
   }
 
-  printk(LOG_INFO "Bitmap PMM initialized.\n");
+  printk(LOG_ERR "pmm: OUT OF MEMORY!\n");
+  return 0;
 }
 
 uintptr_t pmm_alloc_page() {
@@ -105,6 +127,25 @@ uintptr_t pmm_alloc_page() {
 
   printk(LOG_ERR "pmm: OUT OF MEMORY!\n");
   return 0;
+}
+
+void pmm_free_page_count(uintptr_t phys_addr, size_t count) {
+  if (count == 0)
+    return;
+  uint64_t index = phys_addr / PAGE_SIZE;
+  uint64_t end = index + count;
+  if (index >= pmm_map.total_pages)
+    return;
+  if (end > pmm_map.total_pages)
+    end = pmm_map.total_pages;
+
+  for (size_t i = index; i < end; i++) {
+    bitmap_unset_bit(&pmm_map.bitmap, i);
+  }
+
+  if (index < cached_index) {
+    cached_index = index;
+  }
 }
 
 void pmm_free_page(uintptr_t phys_addr) {
