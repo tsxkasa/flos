@@ -1,4 +1,4 @@
-#include <idt.h>
+#include <interrupts/idt.h>
 #include <kernel/printk.h>
 #include <pic/pic.h>
 #include <stdbool.h>
