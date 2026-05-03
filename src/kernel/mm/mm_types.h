@@ -11,6 +11,8 @@
 
 #define IS_PAGE_ALIGNED(num) (((num) & (PAGE_SIZE - 1)) == 0)
 
+#define VM_ALLOC_BASE 0x1000
+
 typedef struct {
   uint64_t phys;
   uint64_t virt;

@@ -91,6 +91,25 @@ void vm_map_destroy(vm_map_t *map) {
   kmem_cache_free(vm_map_cache, map);
 }
 
+uintptr_t vm_map_allocate(vm_map_t *space, size_t size, uint32_t flags) {
+  if (!space || !size)
+    return 0;
+
+  size = ALIGN_UP(size, PAGE_SIZE);
+  uintptr_t candidate = VM_ALLOC_BASE;
+
+  for (vm_area_t *vma = space->areas; vma; vma = vma->next) {
+    if (vma->start >= candidate + size)
+      goto found;
+    if (vma->end > candidate)
+      candidate = vma->end;
+  }
+found:
+  if (!vm_map_allocate_region(space, candidate, size, flags))
+    return 0;
+  return candidate;
+}
+
 bool vm_map_allocate_region(vm_map_t *space, uintptr_t start, size_t size,
                             uint32_t flags) {
   size = ALIGN_UP(size, PAGE_SIZE);

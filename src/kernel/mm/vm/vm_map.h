@@ -16,6 +16,7 @@ void init_vm(void);
 vm_map_t *vm_map_create();
 void vm_map_destroy(vm_map_t *map);
 
+uintptr_t vm_map_allocate(vm_map_t *space, size_t size, uint32_t flags);
 bool vm_map_allocate_region(vm_map_t *space, uintptr_t start, size_t size,
                             uint32_t flags);
 void vm_map_free_region(vm_map_t *space, uintptr_t start, size_t size);
