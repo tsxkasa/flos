@@ -38,7 +38,7 @@ static int kmalloc_index(size_t size) {
   return result;
 }
 
-void *kmalloc(unsigned int size) {
+void *kmalloc(size_t size) {
   if (size == 0)
     return NULL;
 
