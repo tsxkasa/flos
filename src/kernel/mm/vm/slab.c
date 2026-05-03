@@ -66,7 +66,7 @@ struct kmem_cache *kmem_cache_create(size_t obj_size) {
   s->obj_size = obj_size;
   s->size = SLAB_ALIGN(obj_size, sizeof(void *));
 
-  size_t hdr = SLAB_ALIGN(sizeof(struct slab_t), s->size);
+  size_t hdr = SLAB_ALIGN(sizeof(struct slab_t), sizeof(void *));
   s->obj_per_slab = (PAGE_SIZE - hdr) / s->size;
 
   s->partial = NULL;
