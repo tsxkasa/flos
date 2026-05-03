@@ -1,12 +1,16 @@
-#include "isr.h"
 #include <boot/boot.h>
 #include <cpu/halt.h>
 #include <drivers/input/ps2/keyboard/keyboard.h>
 #include <drivers/tty/tty.h>
 #include <gdt.h>
-#include <idt.h>
+#include <interrupts/idt.h>
+#include <interrupts/isr.h>
 #include <kernel/printk.h>
-#include <mm/pmm.h>
+
+#include <kernel/assert.h>
+#include <mm/pmap/pmap.h>
+#include <mm/pmm/pmm.h>
+#include <mm/vm/vm_map.h>
 
 #include <pic/pic.h>
 
@@ -51,9 +55,10 @@ void kmain(void) {
 
   disable_lapic();
 
-  register_interrupt_handler(0, timer_irq_handler);
-
   init_bitmap_pmm();
+  init_pmap();
+
+  register_interrupt_handler(0x20 + 0x00, timer_irq_handler);
   init_keyboard();
 
   printk("Hello kernel!\n");

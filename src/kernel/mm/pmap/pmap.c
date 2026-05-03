@@ -1,7 +1,7 @@
 #include "mm/vm/vm_map.h"
 #include <boot/boot.h>
 #include <cpu/halt.h>
-#include <isr.h>
+#include <interrupts/isr.h>
 #include <kernel/printk.h>
 #include <mm/address.h>
 #include <mm/memory_map.h>

@@ -1,3 +1,6 @@
+#include "mm/mm_types.h"
+#include "mm/pmap/pmap.h"
+#include "mm/vm/vm_area.h"
 #include <cpu/halt.h>
 #include <kernel/printk.h>
 #include <kernel/string.h>
@@ -92,48 +95,17 @@ void vm_map_destroy(vm_map_t *map) {
 
 bool vm_map_allocate_region(vm_map_t *space, uintptr_t start, size_t size,
                             uint32_t flags) {
-  if (!space || !size)
-    return false;
+  size = ALIGN_UP(size, PAGE_SIZE);
 
-  size = (size + 0xFFF) & ~(size_t)0xFFF;
-
-  if (vma_overlaps(space, start, size)) {
-    printk(LOG_WARN "vm_map: region [%p, %p) overlaps existing VMA\n",
-           (void *)start, (void *)(start + size));
+  if (vma_overlaps(space, start, size))
     return false;
-  }
 
   vm_area_t *vma = vma_alloc(start, start + size, flags);
   if (!vma)
     return false;
 
-  uintptr_t va;
-  for (va = start; va < start + size; va += 0x1000) {
-    uintptr_t pa = pmm_alloc_page();
-    if (!pa) {
-      printk(LOG_ERR "vm_map: out of memory allocating region\n");
-      break;
-    }
-
-    if (!pmap_map_page(space->page_table, va, pa, flags)) {
-      printk(LOG_ERR "vm_map: pmap_map_page failed at %p\n", (void *)va);
-      /* Free the page we just allocated but failed to map. */
-      pmm_free_page(pa);
-      break;
-    }
-  }
-
-  if (va < start + size) {
-    for (uintptr_t rb = start; rb < va; rb += 0x1000) {
-      uintptr_t rpa = pmap_unmap_page(space->page_table, rb);
-      if (rpa)
-        pmm_free_page(rpa);
-    }
-    _free_struct(vma);
-    return false;
-  }
-
   insert_vma(space, vma);
+
   return true;
 }
 
@@ -205,15 +177,40 @@ void vm_fault_handler(vm_map_t *space, uintptr_t fault_address,
   bool present = error_code & (1u << 0);
   bool write_fault = error_code & (1u << 1);
   bool user_fault = error_code & (1u << 2);
+
+  vm_area_t *vma = vm_map_lookup(space, fault_address);
+  if (!vma || fault_address < vma->start || fault_address >= vma->end)
+    goto segfault;
+
+  if (!present) {
+
+    uintptr_t va = fault_address & ~0xFFF;
+
+    vm_area_t *vma = vm_map_lookup(space, va);
+    if (!vma)
+      goto segfault;
+
+    uintptr_t pa = pmm_alloc_page();
+    if (!pa)
+      goto segfault;
+
+    uintptr_t kva = phys_to_higher_half_data(pa);
+    memset((void *)kva, 0, PAGE_SIZE);
+
+    pmap_map_page(space->page_table, va, pa, vma->flags);
+
+    return;
+  }
+
+  return;
+
+segfault:
   bool reserved_bit = error_code & (1u << 3);
   bool instr_fetch = error_code & (1u << 4);
 
-  printk(LOG_ERR "vm_map: page fault @ %p  [%s%s%s%s%s]\n",
-         (void *)fault_address, present ? "PROTECT " : "NOT_PRESENT ",
+  printk(LOG_ERR "vm_map: segfault @ %p  [%s%s%s%s%s]\n", (void *)fault_address,
+         present ? "PROTECT " : "NOT_PRESENT ",
          write_fault ? "WRITE " : "READ ", user_fault ? "USER " : "KERNEL ",
          reserved_bit ? "RSVD_BIT " : "", instr_fetch ? "IFETCH" : "");
-
-  // TODO: demand paging
-
   hcf();
 }
