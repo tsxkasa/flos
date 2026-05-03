@@ -40,18 +40,20 @@ static struct slab_t *alloc_new_slab(struct kmem_cache *s) {
 
 static void *__refill(struct kmem_cache *s) {
   struct slab_t *slab = s->partial;
-
   if (!slab) {
     slab = alloc_new_slab(s);
     if (!slab)
       return NULL;
-  } else
+  } else {
     s->partial = slab->next;
+    slab->next = NULL;
+  }
+
+  kassert(slab->freelist != NULL);
 
   void *obj = slab->freelist;
   s->cpu.freelist = get_fp(obj);
   s->cpu.slab = slab;
-
   slab->freelist = NULL;
   slab->inuse++;
   return obj;
@@ -92,12 +94,19 @@ void kmem_cache_free(struct kmem_cache *s, void *obj) {
   struct slab_t *slab =
       (struct slab_t *)((uintptr_t)obj & ~(uintptr_t)(PAGE_SIZE - 1));
 
-  set_fp(obj, s->cpu.freelist);
-  s->cpu.freelist = obj;
   slab->inuse--;
 
-  if (slab != s->cpu.slab && slab->inuse < slab->objects) {
-    slab->next = s->partial;
-    s->partial = slab;
+  if (slab == s->cpu.slab) {
+    set_fp(obj, s->cpu.freelist);
+    s->cpu.freelist = obj;
+  } else {
+    bool was_full = (slab->freelist == NULL);
+    set_fp(obj, slab->freelist);
+    slab->freelist = obj;
+
+    if (was_full) {
+      slab->next = s->partial;
+      s->partial = slab;
+    }
   }
 }
