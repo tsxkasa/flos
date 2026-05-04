@@ -1,6 +1,7 @@
 #ifndef BOOT_H
 #define BOOT_H
 
+#include <drivers/acpi/acpi.h>
 #include <drivers/video/framebuffer/framebuffer.h>
 #include <mm/memory_map.h>
 #include <mm/mm_types.h>
@@ -18,5 +19,7 @@ memory_map_t *boot_get_memmap(void);
 uint64_t boot_get_hhdm_offset(void);
 
 kernel_addr_t boot_get_executable_addr(void);
+
+void *boot_get_rsdp(void);
 
 #endif // BOOT_H
