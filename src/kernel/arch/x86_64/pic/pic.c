@@ -23,6 +23,12 @@
 
 #define CASCADE_IRQ 2
 
+/**
+ * @brief signals interrupt for irq line, irq should be pic mapped
+ * from irq 0 to irq 15
+ *
+ * @param irq   interrupt line ranging from 0 to 15
+ */
 void pic_signal_EOI(uint64_t irq) {
   if (irq >= 8)
     outb(PIC2_COMMAND, PIC_EOI);
@@ -30,6 +36,12 @@ void pic_signal_EOI(uint64_t irq) {
   outb(PIC1_COMMAND, PIC_EOI);
 }
 
+/**
+ * @brief remaps pic master and slave to two offsets
+ *
+ * @param offset1   master PIC vector offset
+ * @param offset2   slave PIC vector offset
+ */
 void pic_remap(int offset1, int offset2) {
   outb(PIC1_COMMAND,
        ICW1_INIT |
@@ -58,6 +70,11 @@ void pic_remap(int offset1, int offset2) {
   outb(PIC2_DATA, 0xff);
 }
 
+/**
+ * @brief masks an interupt vector
+ *
+ * @param irq   interrupt line ranging from 0 to 15
+ */
 void pic_irq_set_mask(uint8_t irq_line) {
   uint16_t port;
   uint8_t value;
@@ -72,6 +89,11 @@ void pic_irq_set_mask(uint8_t irq_line) {
   outb(port, value);
 }
 
+/**
+ * @brief clears interrupt mask
+ *
+ * @param irq   interrupt line ranging from 0 to 15
+ */
 void pic_irq_clear_mask(uint8_t irq_line) {
   uint16_t port;
   uint8_t value;

@@ -4,6 +4,12 @@
 
 static interrupt_handler_t *interrupt_handlers[256];
 
+/**
+ * @brief temporary sets interrupt handler for an interrupt vector in x86_64
+ *
+ * @param vec       the interrupt vector; [0, 255]
+ * @param handler   uint64_t interrupt_handler_t(struct interrupt_frame);
+ */
 void register_interrupt_handler(uint8_t vec, interrupt_handler_t *handler) {
   interrupt_handlers[vec] = handler;
 }
@@ -43,6 +49,14 @@ static const char *exceptions[] = {
     "— : Intel reserved. Do not use."};
 
 // __attribute__((interrupt))
+
+/**
+ * @brief handles interrupts by dispatching handlers registered by
+ * register_interrupt_handler
+ *
+ * @param frame   the interrupt stack frame with interrupt contexts
+ * @return        returns back the interrupt stack pointer
+ */
 uint64_t interrupt_handler(struct interrupt_frame *frame) {
   uint64_t rsp = (uint64_t)frame;
 
