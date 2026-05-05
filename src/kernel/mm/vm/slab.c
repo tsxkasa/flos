@@ -38,7 +38,7 @@ static struct slab_t *alloc_new_slab(struct kmem_cache *s) {
   return slab;
 }
 
-static void *__refill(struct kmem_cache *s) {
+static void *_refill(struct kmem_cache *s) {
   struct slab_t *slab = s->partial;
   if (!slab) {
     slab = alloc_new_slab(s);
@@ -87,7 +87,7 @@ void *kmem_cache_alloc(struct kmem_cache *s) {
     s->cpu.slab->inuse++;
     return obj;
   }
-  return __refill(s);
+  return _refill(s);
 }
 
 void kmem_cache_free(struct kmem_cache *s, void *obj) {
