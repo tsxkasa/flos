@@ -51,7 +51,7 @@ CFLAGS += -Wall -Wextra -std=gnu11 -ffreestanding
 
 # Global Preprocessor flags
 CPPFLAGS ?=
-CPPFLAGS += -I$(TOPDIR)/deps --sysroot=$(SYSROOT) -MMD -MP
+CPPFLAGS += -I$(TOPDIR)/external --sysroot=$(SYSROOT) -MMD -MP
 
 # Global NASM flags
 NASMFLAGS ?= -f elf64 -g -F dwarf -Wall

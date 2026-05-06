@@ -34,7 +34,7 @@ iso: build
 	
 	@cp -v limine.conf iso_root/boot/limine/
 	
-	@cp -v deps/limine/limine-bios.sys deps/limine/limine-bios-cd.bin deps/limine/limine-uefi-cd.bin iso_root/boot/limine/ 2>/dev/null || true
+	@cp -v external/limine/limine-bios.sys external/limine/limine-bios-cd.bin external/limine/limine-uefi-cd.bin iso_root/boot/limine/ 2>/dev/null || true
 
 	@mkdir -p bin/
 
