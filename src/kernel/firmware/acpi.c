@@ -12,9 +12,6 @@
 #include <uacpi/kernel_api.h>
 #include <uacpi/log.h>
 
-// TODO:
-#define UACPI_BAREBONES_MODE
-
 extern vm_map_t *kernel_vm_map;
 
 uacpi_status uacpi_kernel_get_rsdp(uacpi_phys_addr *out_rsdp_address) {
@@ -166,33 +163,27 @@ uacpi_status uacpi_kernel_io_write32(uacpi_handle, uacpi_size offset,
   return UACPI_STATUS_UNIMPLEMENTED;
 }
 
-uacpi_u64 uacpi_kernel_get_nanoseconds_since_boot(void) { return 0; }
+uacpi_u64 uacpi_kernel_get_nanoseconds_since_boot(void) {}
 
 void uacpi_kernel_stall(uacpi_u8 usec) {}
 
 void uacpi_kernel_sleep(uacpi_u64 msec) {}
 
-uacpi_handle uacpi_kernel_create_mutex(void) { return 0; }
+uacpi_handle uacpi_kernel_create_mutex(void) {}
 void uacpi_kernel_free_mutex(uacpi_handle) {}
 
-uacpi_handle uacpi_kernel_create_event(void) { return 0; }
+uacpi_handle uacpi_kernel_create_event(void) {}
 void uacpi_kernel_free_event(uacpi_handle) {}
 
-uacpi_thread_id uacpi_kernel_get_thread_id(void) { return 0; }
+uacpi_thread_id uacpi_kernel_get_thread_id(void) {}
 
-uacpi_interrupt_state uacpi_kernel_disable_interrupts(void) {
-  disable_interrupts();
-  return 0;
-}
+uacpi_interrupt_state uacpi_kernel_disable_interrupts(void) {}
 
-void uacpi_kernel_restore_interrupts(uacpi_interrupt_state state) {
-  enable_interrupts();
-}
+void uacpi_kernel_restore_interrupts(uacpi_interrupt_state state) {}
 
 // TODO:
 
 uacpi_status uacpi_kernel_acquire_mutex(uacpi_handle, uacpi_u16) {
-
   return UACPI_STATUS_UNIMPLEMENTED;
 }
 void uacpi_kernel_release_mutex(uacpi_handle) {}
@@ -204,7 +195,6 @@ void uacpi_kernel_signal_event(uacpi_handle) {}
 void uacpi_kernel_reset_event(uacpi_handle) {}
 
 uacpi_status uacpi_kernel_handle_firmware_request(uacpi_firmware_request *) {
-
   return UACPI_STATUS_UNIMPLEMENTED;
 }
 
