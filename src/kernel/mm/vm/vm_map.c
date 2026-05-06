@@ -134,25 +134,25 @@ found:
  * virtual memory space the allocation will be inserted into space->areas
  *
  * @param space the virtual memory space
- * @param start the start location to allocate to
+ * @param start the virtual memory start location to allocate to
  * @param size size of the allocation
  * @param flags flags to give to the allocated area
- * @return true if allocated successfully, false if not
+ * @return the mapped virtual memory address if success, 0 if not
  */
-bool vm_map_allocate_region(vm_map_t *space, uintptr_t start, size_t size,
-                            uint32_t flags) {
+uintptr_t vm_map_allocate_region(vm_map_t *space, uintptr_t start, size_t size,
+                                 uint32_t flags) {
   size = ALIGN_UP(size, PAGE_SIZE);
 
   if (vma_overlaps(space, start, size))
-    return false;
+    return 0;
 
   vm_area_t *vma = vma_alloc(start, start + size, flags);
   if (!vma)
-    return false;
+    return 0;
 
   insert_vma(space, vma);
 
-  return true;
+  return vma->start;
 }
 
 /**
