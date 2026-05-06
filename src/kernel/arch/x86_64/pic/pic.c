@@ -107,3 +107,8 @@ void pic_irq_clear_mask(uint8_t irq_line) {
   value = inb(port) & ~(1 << irq_line);
   outb(port, value);
 }
+
+void pic_mask_all(void) {
+  outb(PIC1_DATA, 0xff);
+  outb(PIC2_DATA, 0xff);
+}
