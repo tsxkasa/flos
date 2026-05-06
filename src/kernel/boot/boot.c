@@ -1,6 +1,5 @@
 #include <boot/boot.h>
 #include <cpu/halt.h>
-#include <drivers/acpi/acpi.h>
 #include <limine.h>
 #include <mm/mm_types.h>
 #include <stdint.h>

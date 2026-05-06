@@ -1,7 +1,6 @@
 #ifndef BOOT_H
 #define BOOT_H
 
-#include <drivers/acpi/acpi.h>
 #include <drivers/video/framebuffer/framebuffer.h>
 #include <mm/memory_map.h>
 #include <mm/mm_types.h>
