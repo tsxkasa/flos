@@ -1,3 +1,4 @@
+#include "mm/mm_types.h"
 #include <boot/boot.h>
 #include <cpu/halt.h>
 #include <drivers/input/ps2/keyboard/keyboard.h>
@@ -13,6 +14,7 @@
 #include <mm/pmm/pmm.h>
 #include <mm/vm/vm_map.h>
 
+#include <pic/apic/apic.h>
 #include <pic/pic.h>
 
 #include <kernel/string.h>
@@ -65,7 +67,11 @@ void kmain(void) {
 
   init_kmalloc();
 
-  uacpi_initialize(0);
+  void *tmp_bfr = kmalloc(PAGE_SIZE * 2);
+
+  uacpi_setup_early_table_access(tmp_bfr, PAGE_SIZE * 2);
+
+  init_apic();
 
   register_interrupt_handler(0x20 + 0x00, timer_irq_handler);
   init_keyboard();
