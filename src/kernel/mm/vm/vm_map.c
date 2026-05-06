@@ -51,6 +51,11 @@ void init_vm(void) {
     vm_map_cache = kmem_cache_create(sizeof(vm_map_t));
 }
 
+/**
+ * @brief creates a memory map
+ *
+ * @return the memory map the was just created
+ */
 vm_map_t *vm_map_create(void) {
   vm_map_t *space = kmem_cache_alloc(vm_map_cache);
   if (!space) {
@@ -71,6 +76,11 @@ vm_map_t *vm_map_create(void) {
   return space;
 }
 
+/**
+ * @brief destroys given memory map this also handles freeing physical pages
+ *
+ * @param map memory map to destroy
+ */
 void vm_map_destroy(vm_map_t *map) {
   if (!map)
     return;
@@ -91,6 +101,15 @@ void vm_map_destroy(vm_map_t *map) {
   kmem_cache_free(vm_map_cache, map);
 }
 
+/**
+ * @brief finds the first large enough free area in the virtual address and
+ * allocates the given size to
+ *
+ * @param space the virtual memory space to allocate in
+ * @param size  the size of the allocation
+ * @param flags flags to give to the allocated area
+ * @return the candidate, or 0 on failure
+ */
 uintptr_t vm_map_allocate(vm_map_t *space, size_t size, uint32_t flags) {
   if (!space || !size)
     return 0;
@@ -110,6 +129,16 @@ found:
   return candidate;
 }
 
+/**
+ * @brief allocates a region of fixed size at a given start location in the
+ * virtual memory space the allocation will be inserted into space->areas
+ *
+ * @param space the virtual memory space
+ * @param start the start location to allocate to
+ * @param size size of the allocation
+ * @param flags flags to give to the allocated area
+ * @return true if allocated successfully, false if not
+ */
 bool vm_map_allocate_region(vm_map_t *space, uintptr_t start, size_t size,
                             uint32_t flags) {
   size = ALIGN_UP(size, PAGE_SIZE);
@@ -126,6 +155,14 @@ bool vm_map_allocate_region(vm_map_t *space, uintptr_t start, size_t size,
   return true;
 }
 
+/**
+ * @brief lookup if the address is mapped within one of the memory area
+ *
+ * @param space the memory space to lookup
+ * @param addr the address to lookup
+ * @return the memory area that the address is mapped to, or NULL if it isn't
+ * mapped
+ */
 vm_area_t *vm_map_lookup(vm_map_t *space, uintptr_t addr) {
   for (vm_area_t *vma = space->areas; vma; vma = vma->next) {
     if (addr >= vma->start && addr < vma->end)
@@ -134,6 +171,13 @@ vm_area_t *vm_map_lookup(vm_map_t *space, uintptr_t addr) {
   return NULL;
 }
 
+/**
+ * @brief frees region at a given start
+ *
+ * @param space the memory space
+ * @param start pointer to the start location of the memory region to free
+ * @param size size of the memory region to free
+ */
 void vm_map_free_region(vm_map_t *space, uintptr_t start, size_t size) {
   if (!space || !size)
     return;
@@ -189,6 +233,14 @@ void vm_map_free_region(vm_map_t *space, uintptr_t start, size_t size) {
   }
 }
 
+/**
+ * @brief basically lazy allocation; looks up if fault_address exists anywhere
+ * in the mapped memory area space
+ *
+ * @param space space where the faults occurs
+ * @param fault_address the address where the faults occurs
+ * @param error_code the error code incase its segfault
+ */
 void vm_fault_handler(vm_map_t *space, uintptr_t fault_address,
                       uint32_t error_code) {
   bool present = error_code & (1u << 0);
