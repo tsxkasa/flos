@@ -15,7 +15,14 @@ KERNEL_LDFLAGS := $(LDFLAGS) \
     -m elf_x86_64 -nostdlib -static -z max-page-size=0x1000 --gc-sections \
     -T linker.ld
 
-SRCFILES := $(patsubst ./%,%,$(shell find . -type f -name '*.c' -o -name '*.S' -o -name '*.asm' | LC_ALL=C sort))
+SRC_FOLDERS := . $(TOPDIR)/external/uacpi
+SRC_EXCLUDE_STR := *tests*
+SRCFILES := $(patsubst ./%,%,$(shell \
+  find $(SRC_FOLDERS) \
+    -type f \
+    $(foreach p,$(SRC_EXCLUDE_STR),! -path '$(p)') \
+    \( -name '*.c' -o -name '*.S' -o -name '*.asm' \) \
+  | LC_ALL=C sort))
 CFILES := $(filter %.c,$(SRCFILES))
 ASFILES := $(filter %.S,$(SRCFILES))
 NASMFILES := $(filter %.asm,$(SRCFILES))
