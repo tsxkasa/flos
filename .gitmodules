@@ -1,3 +1,7 @@
 [submodule "external/uacpi"]
 	path = external/uacpi
 	url = https://github.com/uACPI/uACPI.git
+[submodule "external/limine"]
+	path = external/limine
+	url = https://github.com/Limine-Bootloader/Limine.git
+	branch = v11.x-binary
