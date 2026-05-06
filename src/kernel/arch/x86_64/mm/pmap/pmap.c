@@ -1,3 +1,4 @@
+#include "mm/vm/vm_map.h"
 #include <cpu/halt.h>
 #include <kernel/printk.h>
 #include <kernel/string.h>
@@ -21,7 +22,7 @@
 #define PAGE_PHYS_MASK 0x000FFFFFFFFFF000ull
 #define PAGE_TABLE_ENTRIES 512u
 
-extern struct page_table_t *kernel_page_table;
+extern vm_map_t *kernel_vm_map;
 
 struct page_table_t {
   uint64_t *pml4_virt;
@@ -44,9 +45,9 @@ struct page_table_t *pmap_create_table(void) {
   uint64_t *virt = (uint64_t *)phys_to_higher_half_data(phys);
   memset(virt, 0, PAGE_SIZE);
 
-  if (kernel_page_table) {
+  if (kernel_vm_map && kernel_vm_map->page_table) {
     for (size_t i = 256; i < PAGE_TABLE_ENTRIES; i++) {
-      virt[i] = kernel_page_table->pml4_virt[i];
+      virt[i] = kernel_vm_map->page_table->pml4_virt[i];
     }
   }
 

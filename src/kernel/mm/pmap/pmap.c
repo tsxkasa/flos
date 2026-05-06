@@ -21,8 +21,6 @@ extern char _rodata_start[];
 extern char _rodata_end[];
 extern char _data_start[];
 
-struct page_table_t *kernel_page_table = NULL;
-
 static bool map_range(struct page_table_t *pt, uintptr_t virt, uintptr_t phys,
                       size_t size, uint32_t flags) {
   for (size_t off = 0; off < size; off += PAGE_SIZE) {
@@ -49,10 +47,8 @@ void init_pmap(void) {
 
   kernel_vm_map = vm_map_create();
 
-  register_interrupt_handler(0xE, pf_interrupt_handler);
-
-  kernel_page_table = pmap_create_table();
-  if (!kernel_page_table) {
+  // kernel_vm_map->page_table = pmap_create_table();
+  if (!kernel_vm_map || !kernel_vm_map->page_table) {
     printk(LOG_ERR "pmap: could not allocate kernel page table\n");
     hcf();
   }
@@ -66,17 +62,18 @@ void init_pmap(void) {
     uintptr_t end = phys + e->length;
 
     while (phys < end) {
-      uintptr_t virt = phys_to_higher_half_data(phys);
       size_t remain = end - phys;
+      uint32_t flags = MMU_FLAG_WRITE | MMU_FLAG_NO_EXEC;
 
-      if ((phys % PAGE_SIZE_2M == 0) && (virt % PAGE_SIZE_2M == 0) &&
-          remain >= PAGE_SIZE_2M) {
-        pmap_map_page_2m(kernel_page_table, virt, phys,
-                         MMU_FLAG_WRITE | MMU_FLAG_NO_EXEC);
+      if ((phys % PAGE_SIZE_2M == 0) && remain >= PAGE_SIZE_2M) {
+        pmap_map_page_2m(kernel_vm_map->page_table, phys, phys, flags);
+        pmap_map_page_2m(kernel_vm_map->page_table,
+                         phys_to_higher_half_data(phys), phys, flags);
         phys += PAGE_SIZE_2M;
       } else {
-        pmap_map_page(kernel_page_table, virt, phys,
-                      MMU_FLAG_WRITE | MMU_FLAG_NO_EXEC);
+        pmap_map_page(kernel_vm_map->page_table, phys, phys, flags);
+        pmap_map_page(kernel_vm_map->page_table, phys_to_higher_half_data(phys),
+                      phys, flags);
         phys += PAGE_SIZE;
       }
     }
@@ -87,7 +84,7 @@ void init_pmap(void) {
 
 #define KPHYS(virt) (kphys_base + ((uintptr_t)(virt) - kvirt_base))
 #define KSECT(lo, hi, flags)                                                   \
-  map_range(kernel_page_table, (uintptr_t)(lo), KPHYS(lo),                     \
+  map_range(kernel_vm_map->page_table, (uintptr_t)(lo), KPHYS(lo),             \
             (uintptr_t)(hi) - (uintptr_t)(lo), (flags))
 
   /* .limine_requests: r */
@@ -105,11 +102,13 @@ void init_pmap(void) {
 #undef KSECT
 #undef KPHYS
 
-  for (uintptr_t addr = PAGE_SIZE; addr < 0x200000; addr += PAGE_SIZE)
-    pmap_map_page(kernel_page_table, addr, addr,
-                  MMU_FLAG_WRITE | MMU_FLAG_NO_EXEC);
+  // for (uintptr_t addr = PAGE_SIZE; addr < 0x200000; addr += PAGE_SIZE)
+  //   pmap_map_page(kernel_vm_map->page_table, addr, addr,
+  //                 MMU_FLAG_WRITE | MMU_FLAG_NO_EXEC);
 
-  pmap_switch(kernel_page_table);
+  register_interrupt_handler(0xE, pf_interrupt_handler);
+  pmap_switch(kernel_vm_map->page_table);
+
   printk(LOG_INFO "pmap initialized\n");
   printk(LOG_INFO "pmap: switched to kernel page table\n");
 }
