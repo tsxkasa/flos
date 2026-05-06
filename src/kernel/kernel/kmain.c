@@ -16,6 +16,7 @@
 #include <pic/pic.h>
 
 #include <kernel/string.h>
+#include <uacpi/uacpi.h>
 
 #include <stddef.h>
 #include <stdint.h>
@@ -63,6 +64,8 @@ void kmain(void) {
   init_pmap();
 
   init_kmalloc();
+
+  uacpi_initialize(0);
 
   register_interrupt_handler(0x20 + 0x00, timer_irq_handler);
   init_keyboard();
