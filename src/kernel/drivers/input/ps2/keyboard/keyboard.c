@@ -40,12 +40,9 @@ static uint64_t keyboard_irq_handler(struct interrupt_frame *frame) {
 }
 
 void init_keyboard() {
-  pic_irq_clear_mask(1);
   register_interrupt_handler(0x21, keyboard_irq_handler);
-  // outb(0x64, 0xAA);
-  // while ((inb(0x64) & 1) == 0)
-  //   io_wait();
-  // (void)inb(0x60);
+  pic_irq_clear_mask(1);
+  outb(0x64, 0xAA);
 
   printk(LOG_INFO "PS/2 Keyboard initialized.\n");
 }

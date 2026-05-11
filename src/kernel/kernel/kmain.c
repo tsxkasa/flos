@@ -1,4 +1,5 @@
 #include "mm/mm_types.h"
+#include "pic/pit.h"
 #include <boot/boot.h>
 #include <cpu/halt.h>
 #include <drivers/input/ps2/keyboard/keyboard.h>
@@ -46,12 +47,6 @@ void disable_lapic(void) {
   wrmsr(IA32_APIC_BASE_MSR, apic_base);
 }
 
-static uint64_t timer_irq_handler(struct interrupt_frame *frame) {
-  pic_signal_EOI(0);
-  printk(LOG_INFO "Timer interrupt initialized.");
-  return (uint64_t)frame;
-}
-
 // entry point
 void kmain(void) {
   boot_init();
@@ -60,6 +55,8 @@ void kmain(void) {
   init_idt();
 
   disable_lapic();
+
+  init_pit(1000);
 
   init_bitmap_pmm();
   init_vm();
@@ -73,7 +70,6 @@ void kmain(void) {
 
   init_apic();
 
-  register_interrupt_handler(0x20 + 0x00, timer_irq_handler);
   init_keyboard();
 
   printk("Hello kernel!\n");
