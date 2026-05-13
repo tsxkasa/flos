@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 #ifdef NDEBUG
-#define assert(expr) ((void)0)
+#define kassert(expr) ((void)0)
 #else
 #define kassert(expr)                                                          \
   ((expr) ? (void)0 : __kassert_fail(#expr, __FILE__, __LINE__, __func__))
