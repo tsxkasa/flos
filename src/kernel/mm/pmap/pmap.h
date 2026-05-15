@@ -4,12 +4,14 @@
 #include <mm/memory_map.h>
 #include <mm/mm_types.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #define MMU_FLAG_PRESENT (1 << 0)
 #define MMU_FLAG_WRITE   (1 << 1)
 #define MMU_FLAG_USER    (1 << 2)
 #define MMU_FLAG_NO_EXEC (1 << 3)
+#define MMU_FLAG_DEVICE  (1 << 4)
 
 struct page_table_t;
 
@@ -66,6 +68,8 @@ bool pmap_map_page_2m(struct page_table_t *table, uintptr_t virt,
  * @return the physical address page just unmapped or 0 if fails
  */
 uintptr_t pmap_unmap_page(struct page_table_t *table, uintptr_t virt);
+
+void pmap_map_mmio(uintptr_t phys, size_t size);
 
 /**
  * @brief switches the context register

@@ -112,3 +112,14 @@ void init_pmap(void) {
   printk(LOG_INFO "pmap initialized\n");
   printk(LOG_INFO "pmap: switched to kernel page table\n");
 }
+
+void pmap_map_mmio(uintptr_t phys, size_t size) {
+  uintptr_t virt = phys + boot_get_hhdm_offset();
+
+  size = (size + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
+
+  for (size_t off = 0; off < size; off += PAGE_SIZE) {
+    pmap_map_page(kernel_vm_map->page_table, virt + off, phys + off,
+                  MMU_FLAG_WRITE | MMU_FLAG_NO_EXEC | MMU_FLAG_DEVICE);
+  }
+}
