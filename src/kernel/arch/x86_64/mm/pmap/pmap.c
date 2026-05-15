@@ -10,16 +10,16 @@
 #include <stdint.h>
 
 #define PAGE_PRESENT (1ull << 0)
-#define PAGE_RW (1ull << 1)
-#define PAGE_USER (1ull << 2)
-#define PAGE_XD (1ull << 63)
+#define PAGE_RW      (1ull << 1)
+#define PAGE_USER    (1ull << 2)
+#define PAGE_XD      (1ull << 63)
 
 #define GET_PML4_IDX(vaddr) (((vaddr) >> 39) & 0x1ff)
 #define GET_PDPT_IDX(vaddr) (((vaddr) >> 30) & 0x1ff)
-#define GET_PD_IDX(vaddr) (((vaddr) >> 21) & 0x1ff)
-#define GET_PT_IDX(vaddr) (((vaddr) >> 12) & 0x1ff)
+#define GET_PD_IDX(vaddr)   (((vaddr) >> 21) & 0x1ff)
+#define GET_PT_IDX(vaddr)   (((vaddr) >> 12) & 0x1ff)
 
-#define PAGE_PHYS_MASK 0x000FFFFFFFFFF000ull
+#define PAGE_PHYS_MASK     0x000FFFFFFFFFF000ull
 #define PAGE_TABLE_ENTRIES 512u
 
 extern vm_map_t *kernel_vm_map;

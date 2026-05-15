@@ -7,8 +7,8 @@
 #include <stdint.h>
 
 #define MMU_FLAG_PRESENT (1 << 0)
-#define MMU_FLAG_WRITE (1 << 1)
-#define MMU_FLAG_USER (1 << 2)
+#define MMU_FLAG_WRITE   (1 << 1)
+#define MMU_FLAG_USER    (1 << 2)
 #define MMU_FLAG_NO_EXEC (1 << 3)
 
 struct page_table_t;

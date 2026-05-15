@@ -1,5 +1,3 @@
-#include "mm/mm_types.h"
-#include "pic/pit.h"
 #include <boot/boot.h>
 #include <cpu/halt.h>
 #include <drivers/input/ps2/keyboard/keyboard.h>
@@ -8,6 +6,7 @@
 #include <interrupts/idt.h>
 #include <interrupts/isr.h>
 #include <kernel/printk.h>
+#include <mm/mm_types.h>
 
 #include <kernel/kassert.h>
 #include <kernel/stdlib.h>
@@ -17,15 +16,17 @@
 
 #include <pic/apic/apic.h>
 #include <pic/pic.h>
+#include <pic/pit.h>
 
 #include <kernel/string.h>
+#include <stdbool.h>
 #include <uacpi/uacpi.h>
 
 #include <stddef.h>
 #include <stdint.h>
 
 #define IA32_APIC_BASE_MSR 0x1B
-#define APIC_ENABLE (1ULL << 11)
+#define APIC_ENABLE        (1ULL << 11)
 
 static inline uint64_t rdmsr(uint32_t msr) {
   uint32_t lo, hi;

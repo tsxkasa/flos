@@ -1,2 +1,4 @@
-Language: C
+Language: Cpp
 BasedOnStyle: LLVM
+
+AlignConsecutiveMacros: true
