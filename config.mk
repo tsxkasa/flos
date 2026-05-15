@@ -41,9 +41,12 @@ LIBDIR := $(EXEC_PREFIX)/lib
 
 
 DEBUG ?= 0
+RELEASE ?= 0
 # Global C Flags
 ifeq ($(DEBUG), 1)
 CFLAGS ?= -O0 -ggdb -pipe -DDEBUG 
+else ifeq ($(RELEASE), 1)
+CFLAGS ?= -O3 -DNDEBUG
 else
 CFLAGS ?= -O2 -ggdb -pipe -DNDEBUG
 endif
