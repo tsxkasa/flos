@@ -1,31 +1,44 @@
 #include <kernel/printk.h>
 #include <pic/apic/apic.h>
+#include <pic/apic/lapic.h>
+#include <pic/pic.h>
 #include <stdint.h>
 #include <uacpi/acpi.h>
 #include <uacpi/tables.h>
 
-void parse_lapic(struct acpi_madt_lapic *lapic) {
+static struct apic_info apic;
+
+static void parse_lapic(struct acpi_madt_lapic *lapic) {
   if (!lapic)
     return;
 
   if (lapic->hdr.length < sizeof(struct acpi_madt_lapic)) {
-    printk("LAPIC: invalid length %u\n", lapic->hdr.length);
+    printk(LOG_WARN "LAPIC: invalid length %u\n", lapic->hdr.length);
     return;
   }
 
-  uint8_t cpu = lapic->uid;
-  uint8_t apic = lapic->id;
-  uint32_t flags = lapic->flags;
-
-  if (!(flags & 1)) {
-    printk(LOG_INFO "LAPIC: CPU %u (APIC %u) disabled\n", cpu, apic);
+  if (apic.cpu_count >= MAX_CPU) {
+    printk(LOG_WARN "LAPIC: too many CPUs\n");
     return;
   }
 
-  printk(LOG_INFO "LAPIC: CPU %u -> APIC ID %u (enabled)\n", cpu, apic);
+  struct apic_cpu *cpu = &apic.cpus[apic.cpu_count++];
+
+  cpu->apic_uid = lapic->uid;
+  cpu->apic_id = lapic->id;
+  cpu->enabled = (lapic->flags & 1) != 0;
+
+  if (!cpu->enabled) {
+    printk(LOG_INFO "LAPIC: CPU %u (APIC %u) disabled\n", cpu->apic_uid,
+           cpu->apic_id);
+    return;
+  }
+
+  printk(LOG_INFO "LAPIC: CPU %u -> APIC ID %u (enabled)\n", cpu->apic_uid,
+         cpu->apic_id);
 }
 
-void parse_ioapic(struct acpi_madt_ioapic *ioapic) {
+static void parse_ioapic(struct acpi_madt_ioapic *ioapic) {
   if (!ioapic)
     return;
 
@@ -34,14 +47,22 @@ void parse_ioapic(struct acpi_madt_ioapic *ioapic) {
     return;
   }
 
-  uint8_t id = ioapic->id;
-  uint32_t addr = ioapic->address;
-  uint32_t gsi_base = ioapic->gsi_base;
+  if (apic.ioapic_count >= MAX_IOAPIC) {
+    printk(LOG_WARN "IOAPIC: too many IOAPIC\n");
+    return;
+  }
 
-  printk(LOG_INFO "IOAPIC: id=%u addr=0x%x GSI base=%u\n", id, addr, gsi_base);
+  struct ioapic_info *ioa = &apic.ioapic[apic.ioapic_count++];
+
+  ioa->id = ioapic->id;
+  ioa->addr = ioapic->address;
+  ioa->gsi_base = ioapic->gsi_base;
+
+  printk(LOG_INFO "IOAPIC: id=%u addr=0x%x GSI base=%u\n", ioa->id, ioa->addr,
+         ioa->gsi_base);
 }
 
-void parse_iso(struct acpi_madt_interrupt_source_override *iso) {
+static void parse_iso(struct acpi_madt_interrupt_source_override *iso) {
   if (!iso)
     return;
 
@@ -50,19 +71,30 @@ void parse_iso(struct acpi_madt_interrupt_source_override *iso) {
     return;
   }
 
-  uint8_t bus = iso->bus;
-  uint8_t source = iso->source;
-  uint32_t gsi = iso->gsi;
-  uint16_t flags = iso->flags;
+  if (iso->bus != 0) {
+    printk(LOG_WARN "ISO: unsupported bus\n");
+    return;
+  }
 
-  uint8_t polarity = flags & 0x3;
-  uint8_t trigger = (flags >> 2) & 0x3;
+  if (apic.iso_count > MAX_ISO) {
+    printk(LOG_WARN "ISO: too many ISOs\n");
+    return;
+  }
 
-  printk(LOG_INFO "ISO: bus=%u IRQ=%u -> GSI=%u (pol=%u trig=%u)\n", bus,
-         source, gsi, polarity, trigger);
+  struct apic_iso *aiso = &apic.iso[apic.iso_count++];
+
+  aiso->source_irq = iso->source;
+  aiso->gsi = iso->gsi;
+  aiso->flags = iso->flags;
+
+  uint8_t polarity = aiso->flags & 0x3;
+  uint8_t trigger = (aiso->flags >> 2) & 0x3;
+
+  printk(LOG_INFO "ISO: bus=%u IRQ=%u -> GSI=%u (pol=%u trig=%u)\n", 0,
+         aiso->source_irq, aiso->gsi, polarity, trigger);
 }
 
-void init_apic(void) {
+static void parse_madt(void) {
   uacpi_table tbl;
 
   if (uacpi_table_find_by_signature(ACPI_MADT_SIGNATURE, &tbl) !=
@@ -106,6 +138,13 @@ void init_apic(void) {
 
     ptr += h->length;
   }
+}
+
+void init_apic(void) {
+  parse_madt();
+  pic_mask_all();
+
+  init_lapic();
 
   printk(LOG_INFO "APIC initialized\n");
 }

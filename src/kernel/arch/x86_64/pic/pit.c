@@ -47,3 +47,40 @@ void init_pit(uint64_t target_hz) {
   pic_irq_clear_mask(0);
   printk(LOG_INFO "PIT initialized\n");
 }
+
+static inline uint16_t pit_read_counter(void) {
+  outb(PIT_COMMAND, 0x00); // latch command
+  uint8_t lo = inb(PIT_CHANNEL0);
+  uint8_t hi = inb(PIT_CHANNEL0);
+  return (hi << 8) | lo;
+}
+
+/**
+ * @brief sleeps pit timer (without interrupts) for n milliseconds
+ *
+ * @param ms amount of time to sleep for
+ */
+void pit_sleep(uint32_t ms) {
+  // channel 0 mode 2, access lo/hi
+  outb(PIT_COMMAND, 0x34);
+  outb(PIT_CHANNEL0, 0xFF);
+  outb(PIT_CHANNEL0, 0xFF);
+
+  uint64_t target_ticks = (1193182ULL * ms) / 1000ULL;
+  uint64_t accumulated_ticks = 0;
+
+  uint16_t last_tick = pit_read_counter();
+
+  while (accumulated_ticks < target_ticks) {
+    uint16_t current_tick = pit_read_counter();
+
+    if (last_tick >= current_tick) {
+      accumulated_ticks += (last_tick - current_tick);
+    } else {
+      accumulated_ticks += (last_tick + (0xFFFF - current_tick) + 1);
+    }
+
+    last_tick = current_tick;
+    asm volatile("pause");
+  }
+}
