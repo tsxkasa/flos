@@ -31,7 +31,7 @@ struct interrupt_frame {
   uint64_t rflags;
   uint64_t rsp;
   uint64_t ss;
-};
+} __attribute__((packed));
 
 typedef void interrupt_handler_t(struct interrupt_frame *frame);
 

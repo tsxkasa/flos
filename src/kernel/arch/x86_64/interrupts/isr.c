@@ -1,3 +1,4 @@
+#include <asm/interrupts.h>
 #include <interrupts/isr.h>
 #include <kernel/printk.h>
 #include <stdint.h>
@@ -11,7 +12,9 @@ static interrupt_handler_t *interrupt_handlers[256];
  * @param handler   uint64_t interrupt_handler_t(struct interrupt_frame);
  */
 void register_interrupt_handler(uint8_t vec, interrupt_handler_t *handler) {
+  disable_interrupts();
   interrupt_handlers[vec] = handler;
+  enable_interrupts();
 }
 
 static const char *exceptions[] = {
@@ -47,8 +50,6 @@ static const char *exceptions[] = {
     "— : Intel reserved. Do not use.",
     "— : Intel reserved. Do not use.",
     "— : Intel reserved. Do not use."};
-
-// __attribute__((interrupt))
 
 /**
  * @brief handles interrupts by dispatching handlers registered by

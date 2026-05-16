@@ -44,7 +44,6 @@ _isr_handler:
   cld
 
   mov rdi, rsp
-
   call interrupt_handler
 
   popall64r
