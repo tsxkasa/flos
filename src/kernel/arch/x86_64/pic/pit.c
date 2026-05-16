@@ -14,7 +14,7 @@ uint64_t pit_count = 0;
 
 static uint64_t pit_interrupt_handler(struct interrupt_frame *frame) {
   pit_count++;
-  pic_signal_EOI(0);
+  pic_signal_EOI(PIC_IRQ_LINE_SYSTEM_TIMER);
   return (uint64_t)frame;
 }
 
