@@ -5,13 +5,13 @@ _exception_handler:
 
 %macro isr_err_stub 1
 isr_stub_%+%1:
-    push %1 ; err code
+    push %1
     jmp _isr_handler
 %endmacro
 %macro isr_no_err_stub 1
 isr_stub_%+%1:
-    push 0 
-    push %1 ; err code
+    push 0 ; err code
+    push %1
     jmp _isr_handler
 %endmacro
 
@@ -49,27 +49,19 @@ isr_no_err_stub 29
 isr_err_stub    30
 isr_no_err_stub 31
 
-isr_no_err_stub 32
-isr_no_err_stub 33
-isr_no_err_stub 34
-isr_no_err_stub 35
-isr_no_err_stub 36
-isr_no_err_stub 37
-isr_no_err_stub 38
-isr_no_err_stub 39
-isr_no_err_stub 40
-isr_no_err_stub 41
-isr_no_err_stub 42
-isr_no_err_stub 43
-isr_no_err_stub 44
-isr_no_err_stub 45
-isr_no_err_stub 46
-isr_no_err_stub 47
+%assign i 32
+%rep 224
+isr_stub_%+i:
+    push 0 
+    push i
+    jmp _isr_handler
+%assign i i+1
+%endrep
 
 global _isr_stub_table
 _isr_stub_table:
 %assign i 0 
-%rep    48
+%rep    256
     dq isr_stub_%+i 
 %assign i i+1 
 %endrep

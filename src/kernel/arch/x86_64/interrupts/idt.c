@@ -32,17 +32,11 @@ void init_idt() {
   idtr.base = (uintptr_t)&idt[0];
   idtr.limit = (uint16_t)sizeof(struct idt_desc) * IDT_MAX_DESCRIPTORS - 1;
 
-  for (uint8_t vector = 0; vector < 32; vector++) {
-    idt_set_descriptor(vector, _isr_stub_table[vector], 0x8E);
-    vectors[vector] = true;
-  }
-
   // master (0-7) is moved to 32-39
   // slave (8-15) is moved to 40-47
   pic_remap(0x20, 0x28);
 
-  // maps irq 0-15 of pic to 32-47 idx
-  for (uint8_t vector = 32; vector < 48; vector++) {
+  for (uint16_t vector = 0; vector < 256; vector++) {
     idt_set_descriptor(vector, _isr_stub_table[vector], 0x8E);
     vectors[vector] = true;
   }
