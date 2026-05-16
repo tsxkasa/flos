@@ -40,7 +40,8 @@ static uint64_t keyboard_irq_handler(struct interrupt_frame *frame) {
 }
 
 void init_keyboard() {
-  register_interrupt_handler(INTERRUPT_PS2_KBM_VECTOR, keyboard_irq_handler);
+  register_interrupt_handler(INTERRUPT_KEYBOARD_CONTROLLER_VECTOR,
+                             keyboard_irq_handler);
   pic_irq_clear_mask(1);
   outb(0x64, 0xAA);
 
