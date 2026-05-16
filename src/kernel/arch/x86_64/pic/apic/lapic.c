@@ -1,4 +1,3 @@
-#include "pic/pic.h"
 #include <boot/boot.h>
 #include <interrupts/isr.h>
 #include <mm/mm_types.h>
