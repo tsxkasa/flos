@@ -1,3 +1,4 @@
+#include "pic/pic.h"
 #include <boot/boot.h>
 #include <interrupts/isr.h>
 #include <mm/mm_types.h>
@@ -152,7 +153,7 @@ void init_lapic(void) {
   printk(LOG_INFO "LAPIC id=%u initialized\n", lapic_read(LAPIC_REG_ID) >> 24);
 
   register_interrupt_handler(0xFF, spurious_handler);
-  register_interrupt_handler(0x20, lapic_timer_hander);
+  register_interrupt_handler(INTERRUPT_TIMER_VECTOR, lapic_timer_hander);
 
   lapic_timer_calibrate();
 
@@ -167,7 +168,7 @@ void lapic_timer_start(uint32_t hz) {
 
   lapic_write(LAPIC_REG_TIMER_DIVIDE, 0x3); // divide by 16
   lapic_write(LAPIC_REG_LVT_TIMER,
-              LAPIC_TIMER_MODE_PERIODIC | 0x20); // 0x20 for interrupt vector 32
+              LAPIC_TIMER_MODE_PERIODIC | INTERRUPT_TIMER_VECTOR);
   lapic_write(LAPIC_REG_TIMER_INITIAL, period);
 
   printk(LOG_INFO "LAPIC timer started at %u Hz\n", hz);

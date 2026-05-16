@@ -43,7 +43,7 @@ void init_pit(uint64_t target_hz) {
   // Then high byte
   outb(PIT_CHANNEL0, (uint8_t)((divisor >> 8) & 0xFF));
 
-  register_interrupt_handler(0x20 + 0x00, pit_interrupt_handler);
+  register_interrupt_handler(INTERRUPT_TIMER_VECTOR, pit_interrupt_handler);
   pic_irq_clear_mask(0);
   printk(LOG_INFO "PIT initialized\n");
 }

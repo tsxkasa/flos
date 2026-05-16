@@ -10,3 +10,5 @@ bin/
 build/
 sysroot/
 iso_root/
+
+.dev
