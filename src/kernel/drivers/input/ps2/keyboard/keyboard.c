@@ -13,7 +13,7 @@ static uint64_t keyboard_irq_handler(struct interrupt_frame *frame) {
 
   if (scancode == 0xE0) {
     extended_key = 1;
-    pic_signal_EOI(1);
+    pic_signal_EOI(PIC_IRQ_LINE_KEYBOARD_CONTROLLER);
     return (uint64_t)frame;
   }
 
@@ -35,14 +35,14 @@ static uint64_t keyboard_irq_handler(struct interrupt_frame *frame) {
     return (uint64_t)frame;
   }
 
-  pic_signal_EOI(1);
+  pic_signal_EOI(PIC_IRQ_LINE_KEYBOARD_CONTROLLER);
   return (uint64_t)frame;
 }
 
 void init_keyboard() {
   register_interrupt_handler(INTERRUPT_KEYBOARD_CONTROLLER_VECTOR,
                              keyboard_irq_handler);
-  pic_irq_clear_mask(1);
+  pic_irq_clear_mask(PIC_IRQ_LINE_KEYBOARD_CONTROLLER);
   outb(0x64, 0xAA);
 
   printk(LOG_INFO "PS/2 Keyboard initialized.\n");
