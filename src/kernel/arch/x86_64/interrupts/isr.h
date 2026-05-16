@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+#define INTERRUPT_TIMER_VECTOR   0x20
+#define INTERRUPT_PS2_KBM_VECTOR 0x21
+
 struct interrupt_frame {
   uint64_t rax;
   uint64_t rbx;

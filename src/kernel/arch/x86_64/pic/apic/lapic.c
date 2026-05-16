@@ -167,7 +167,7 @@ void lapic_timer_start(uint32_t hz) {
 
   lapic_write(LAPIC_REG_TIMER_DIVIDE, 0x3); // divide by 16
   lapic_write(LAPIC_REG_LVT_TIMER,
-              LAPIC_TIMER_MODE_PERIODIC | 0x20); // 0x20 for interrupt vector 32
+              LAPIC_TIMER_MODE_PERIODIC | INTERRUPT_TIMER_VECTOR);
   lapic_write(LAPIC_REG_TIMER_INITIAL, period);
 
   printk(LOG_INFO "LAPIC timer started at %u Hz\n", hz);
