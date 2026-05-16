@@ -31,7 +31,7 @@ static void keyboard_irq_handler(struct interrupt_frame *frame) {
       }
     }
 
-    pic_signal_EOI(1);
+    pic_signal_EOI(PIC_IRQ_LINE_KEYBOARD_CONTROLLER);
     return;
   }
 
