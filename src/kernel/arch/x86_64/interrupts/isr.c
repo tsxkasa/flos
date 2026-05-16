@@ -57,13 +57,11 @@ static const char *exceptions[] = {
  * @param frame   the interrupt stack frame with interrupt contexts
  * @return        returns back the interrupt stack pointer
  */
-uint64_t interrupt_handler(struct interrupt_frame *frame) {
-  uint64_t rsp = (uint64_t)frame;
-
+void interrupt_handler(struct interrupt_frame *frame) {
   interrupt_handler_t *handler = interrupt_handlers[frame->int_no];
 
   if (handler) {
-    rsp = handler(frame);
+    handler(frame);
   } else {
     printk(LOG_WARN "No interrupt handler is found for vector:%d\n",
            frame->int_no);
@@ -93,5 +91,5 @@ uint64_t interrupt_handler(struct interrupt_frame *frame) {
     while (1)
       __asm__ volatile("cli; hlt");
   }
-  return rsp;
+  return;
 }

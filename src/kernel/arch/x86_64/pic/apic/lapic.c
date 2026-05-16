@@ -92,19 +92,19 @@ static inline void wrmsr(uint32_t msr, uint64_t val) {
   __asm__ volatile("wrmsr" : : "c"(msr), "a"(lo), "d"(hi));
 }
 
-static uint64_t spurious_handler(struct interrupt_frame *frame) {
+static void spurious_handler(struct interrupt_frame *frame) {
   lapic_eoi();
-  return (uint64_t)frame;
+  return;
 }
 
-static uint64_t lapic_timer_hander(struct interrupt_frame *frame) {
+static void lapic_timer_hander(struct interrupt_frame *frame) {
   lapic_ticks++;
   lapic_eoi();
   if (lapic_ticks % 1000 == 0) {
     printk(LOG_DEBUG "LAPIC: %u seconds passed, ticks at: %llu\n",
            lapic_ticks / 1000, lapic_ticks);
   }
-  return (uint64_t)frame;
+  return;
 }
 
 void lapic_eoi(void) { lapic_write(LAPIC_REG_EOI, 0); }

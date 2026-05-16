@@ -46,7 +46,6 @@ _isr_handler:
   mov rdi, rsp
 
   call interrupt_handler
-  mov rsp, rax ; return value
 
   popall64r
 

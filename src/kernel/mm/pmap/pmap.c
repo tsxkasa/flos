@@ -21,13 +21,13 @@ extern char _rodata_start[];
 extern char _rodata_end[];
 extern char _data_start[];
 
-static uint64_t pf_interrupt_handler(struct interrupt_frame *frame) {
+static void pf_interrupt_handler(struct interrupt_frame *frame) {
   uint32_t err = frame->error_code;
   unsigned long addr;
   __asm__ __volatile__("mov %%cr2, %0" : "=r"(addr));
   vm_fault_handler(kernel_vm_map, addr, err);
 
-  return (uint64_t)frame;
+  return;
 }
 
 void init_pmap(void) {

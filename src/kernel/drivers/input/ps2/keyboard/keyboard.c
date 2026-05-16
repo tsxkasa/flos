@@ -8,13 +8,13 @@
 
 static int extended_key = 0;
 
-static uint64_t keyboard_irq_handler(struct interrupt_frame *frame) {
+static void keyboard_irq_handler(struct interrupt_frame *frame) {
   uint8_t scancode = inb(0x60);
 
   if (scancode == 0xE0) {
     extended_key = 1;
     pic_signal_EOI(PIC_IRQ_LINE_KEYBOARD_CONTROLLER);
-    return (uint64_t)frame;
+    return;
   }
 
   if (extended_key) {
@@ -32,11 +32,11 @@ static uint64_t keyboard_irq_handler(struct interrupt_frame *frame) {
     }
 
     pic_signal_EOI(1);
-    return (uint64_t)frame;
+    return;
   }
 
   pic_signal_EOI(PIC_IRQ_LINE_KEYBOARD_CONTROLLER);
-  return (uint64_t)frame;
+  return;
 }
 
 void init_keyboard() {
