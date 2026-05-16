@@ -120,6 +120,6 @@ void pmap_map_mmio(uintptr_t phys, size_t size) {
 
   for (size_t off = 0; off < size; off += PAGE_SIZE) {
     pmap_map_page(kernel_vm_map->page_table, virt + off, phys + off,
-                  MMU_FLAG_WRITE | MMU_FLAG_NO_EXEC | MMU_FLAG_DEVICE);
+                  MMU_FLAG_WRITE | MMU_FLAG_NO_EXEC | MMU_FLAG_UC);
   }
 }
