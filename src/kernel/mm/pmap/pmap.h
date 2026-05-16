@@ -12,6 +12,7 @@
 #define MMU_FLAG_USER    (1 << 2)
 #define MMU_FLAG_NO_EXEC (1 << 3)
 #define MMU_FLAG_UC      (1 << 4)
+#define MMU_FLAG_HUGE_OK (1 << 5)
 
 struct page_table_t;
 
@@ -27,9 +28,10 @@ void init_pmap(void);
 void pmap_destroy_table(struct page_table_t *table);
 
 /**
- * @brief maps one virtual 4KiB page to the page table. it walks the page table
- * to ensure all intermediate page table exists, and installs mapping from the
- * given virtual address to the physical address
+ * @brief maps one virtual arbitarily sized page (up to the flags specified) to
+ * the page table. it walks the page table to ensure all intermediate page table
+ * exists, and installs mapping from the given virtual address to the physical
+ * address
  *
  * @param table       pointer to the page table containing the active address
  * space
@@ -38,27 +40,19 @@ void pmap_destroy_table(struct page_table_t *table);
  * @param phys        physical address to map to the given virtual address,
  * caller must guarantee this address is page aligned
  * @param flags       memory access flags: rwx perms
- * @return true if page was mapped, false if anything fails
+ * @param remain      remaining contiguous memory from phys to end of memory
+ * @return -1 if failed to map, size of mapped page if successful
  */
-bool pmap_map_page(struct page_table_t *table, uintptr_t virt, uintptr_t phys,
-                   uint32_t flags);
+uint64_t pmap_map_range(struct page_table_t *table, uintptr_t virt,
+                        uintptr_t phys, uint32_t flags, uint64_t remain);
 
 /**
- * @brief maps one virtual 2MiB page to the page table. it walks the page table
- * to ensure all intermediate page table exists, and installs mapping from the
- * given virtual address to the physical address
+ * @brief maps a fixed 4KiB page to the page table.
  *
- * @param table       pointer to the page table containing the active address
- * space
- * @param virt        virtual address to map, only page aligned portion will be
- * used for indexing page structures
- * @param phys        physical address to map to the given virtual address,
- * caller must guarantee this address is page aligned
- * @param flags       memory access flags: rwx perms
- * @return true if page was mapped, false if anything fails
+ * see pmap_map_range but without remain param
  */
-bool pmap_map_page_2m(struct page_table_t *table, uintptr_t virt,
-                      uintptr_t phys, uint32_t flags);
+uint64_t pmap_map_page(struct page_table_t *table, uintptr_t virt,
+                       uintptr_t phys, uint32_t flags);
 
 /**
  * @brief unmaps one page at the given virtual address

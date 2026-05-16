@@ -10,10 +10,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define TABLE_LEVEL_PT   1
-#define TABLE_LEVEL_PD   2
-#define TABLE_LEVEL_PDPT 3
-
 #define PAGE_PRESENT  (1ull << 0)
 #define PAGE_RW       (1ull << 1)
 #define PAGE_USER     (1ull << 2)
@@ -132,8 +128,11 @@ static uint64_t *get_next_level(uint64_t *current_table, uint16_t index,
                                 int allocate) {
   uint64_t entry = current_table[index];
 
-  if (entry & PAGE_PRESENT)
+  if (entry & PAGE_PRESENT) {
+    if (entry & PDE_PS || entry & PDPTE_PS)
+      return NULL;
     return (uint64_t *)phys_to_higher_half_data(entry & PAGE_PHYS_MASK);
+  }
 
   if (!allocate)
     return NULL;
@@ -153,7 +152,7 @@ static uint64_t *get_next_level(uint64_t *current_table, uint16_t index,
   return next_virt;
 }
 
-static uint64_t parse_arch_flags(uint32_t flags, int table_level) {
+static uint64_t parse_common_flags(uint32_t flags) {
   uint64_t arch_flags = PAGE_PRESENT;
   if (flags & MMU_FLAG_WRITE)
     arch_flags |= PAGE_RW;
@@ -161,6 +160,7 @@ static uint64_t parse_arch_flags(uint32_t flags, int table_level) {
     arch_flags |= PAGE_USER;
   if (flags & MMU_FLAG_UC) {
     arch_flags |= PAGE_PCD;
+    // arch_flags |= PAGE_PWT;
     arch_flags &= ~PAGE_PWT;
   }
   if (flags & MMU_FLAG_NO_EXEC)
@@ -168,10 +168,8 @@ static uint64_t parse_arch_flags(uint32_t flags, int table_level) {
   return arch_flags;
 }
 
-bool pmap_map_page(struct page_table_t *table, uintptr_t virt, uintptr_t phys,
-                   uint32_t flags) {
-  uint64_t arch_flags = parse_arch_flags(flags, TABLE_LEVEL_PT);
-
+static uint64_t map(struct page_table_t *table, uintptr_t virt, uintptr_t phys,
+                    uint64_t arch_flags) {
   uint16_t pml4_idx = GET_PML4_IDX(virt);
   uint16_t pdpt_idx = GET_PDPT_IDX(virt);
   uint16_t pd_idx = GET_PD_IDX(virt);
@@ -180,26 +178,23 @@ bool pmap_map_page(struct page_table_t *table, uintptr_t virt, uintptr_t phys,
   uint64_t *pml4 = table->pml4_virt;
   uint64_t *pdpt = get_next_level(pml4, pml4_idx, 1);
   if (!pdpt)
-    return false;
+    return 0;
   uint64_t *pd = get_next_level(pdpt, pdpt_idx, 1);
   if (!pd)
-    return false;
+    return 0;
   uint64_t *pt = get_next_level(pd, pd_idx, 1);
   if (!pt)
-    return false;
+    return 0;
 
   pt[pt_idx] = phys | arch_flags;
 
   asm volatile("invlpg (%0)" : : "r"(virt) : "memory");
 
-  return true;
+  return PAGE_SIZE;
 }
 
-bool pmap_map_page_2m(struct page_table_t *table, uintptr_t virt,
-                      uintptr_t phys, uint32_t flags) {
-  uint64_t arch_flags = parse_arch_flags(flags, TABLE_LEVEL_PT);
-  arch_flags |= PDE_PS; // TODO: actually make flags important
-
+static uint64_t map_2m(struct page_table_t *table, uintptr_t virt,
+                       uintptr_t phys, uint64_t arch_flags) {
   uint16_t pml4_idx = GET_PML4_IDX(virt);
   uint16_t pdpt_idx = GET_PDPT_IDX(virt);
   uint16_t pd_idx = GET_PD_IDX(virt);
@@ -210,15 +205,87 @@ bool pmap_map_page_2m(struct page_table_t *table, uintptr_t virt,
 
   uint64_t *pd = get_next_level(pdpt, pdpt_idx, 1);
   if (!pd)
-    return false;
+    return 0;
 
-  // We write the physical address directly into the Page Directory
   pd[pd_idx] = phys | arch_flags;
 
-  // Optional: only invalidate if this table is active
   asm volatile("invlpg (%0)" : : "r"(virt) : "memory");
 
-  return true;
+  return PAGE_SIZE_2M;
+}
+
+static uint64_t map_1g(struct page_table_t *table, uintptr_t virt,
+                       uintptr_t phys, uint64_t arch_flags) {
+  uint16_t pml4_idx = GET_PML4_IDX(virt);
+  uint16_t pdpt_idx = GET_PDPT_IDX(virt);
+
+  uint64_t *pdpt = get_next_level(table->pml4_virt, pml4_idx, 1);
+  if (!pdpt)
+    return 0;
+
+  pdpt[pdpt_idx] = phys | arch_flags;
+
+  asm volatile("invlpg (%0)" : : "r"(virt) : "memory");
+
+  return PAGE_SIZE_1G;
+}
+
+static uint64_t map_huge_ok(struct page_table_t *table, uintptr_t virt,
+                            uintptr_t phys, uint64_t arch_flags,
+                            uint64_t remain) {
+
+  if (phys % PAGE_SIZE_1G == 0 && virt % PAGE_SIZE_1G == 0 &&
+      remain >= PAGE_SIZE_1G) {
+    arch_flags |= PDPTE_PS;
+    return map_1g(table, virt, phys, arch_flags);
+  }
+  if (phys % PAGE_SIZE_2M == 0 && virt % PAGE_SIZE_2M == 0 &&
+      remain >= PAGE_SIZE_2M) {
+    arch_flags |= PDE_PS;
+    return map_2m(table, virt, phys, arch_flags);
+  } else {
+    return map(table, virt, phys, arch_flags);
+  }
+}
+
+uint64_t pmap_map_range(struct page_table_t *table, uintptr_t virt,
+                        uintptr_t phys, uint32_t flags, uint64_t remain) {
+  uint64_t arch_flags = parse_common_flags(flags);
+  uint64_t mapped = 0;
+
+  uint64_t start_virt = ALIGN_DOWN(virt, PAGE_SIZE);
+  uint64_t end_virt = ALIGN_UP(virt + remain, PAGE_SIZE);
+  remain = end_virt - start_virt;
+
+  virt = start_virt;
+  phys = ALIGN_DOWN(phys, PAGE_SIZE);
+
+  while (remain > 0) {
+    size_t step;
+
+    if (flags & MMU_FLAG_HUGE_OK) {
+      step = map_huge_ok(table, virt, phys, arch_flags, remain);
+    } else {
+      step = map(table, virt, phys, arch_flags);
+    }
+
+    if (!step)
+      break;
+
+    virt += step;
+    phys += step;
+    remain -= step;
+    mapped += step;
+  }
+  return mapped;
+}
+
+uint64_t pmap_map_page(struct page_table_t *table, uintptr_t virt,
+                       uintptr_t phys, uint32_t flags) {
+  virt = ALIGN_DOWN(virt, PAGE_SIZE);
+  phys = ALIGN_DOWN(phys, PAGE_SIZE);
+  uint64_t arch_flags = parse_common_flags(flags);
+  return map(table, virt, phys, arch_flags);
 }
 
 uintptr_t pmap_unmap_page(struct page_table_t *table, uintptr_t virt) {

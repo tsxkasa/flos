@@ -29,21 +29,8 @@ void *uacpi_kernel_map(uacpi_phys_addr addr, uacpi_size len) {
   if (!virt)
     return NULL;
 
-  uintptr_t virt_tmp = virt;
-
-  for (size_t i = 0; i < size; i += PAGE_SIZE) {
-    if (!pmap_map_page(kernel_vm_map->page_table, virt_tmp, phys,
-                       MMU_FLAG_NO_EXEC | MMU_FLAG_WRITE)) {
-      uintptr_t v = virt;
-      for (size_t j = 0; j < i; j += PAGE_SIZE) {
-        pmap_unmap_page(kernel_vm_map->page_table, v);
-        v += PAGE_SIZE;
-      }
-      return NULL;
-    }
-    virt_tmp += PAGE_SIZE;
-    phys += PAGE_SIZE;
-  }
+  pmap_map_range(kernel_vm_map->page_table, virt, phys,
+                 MMU_FLAG_NO_EXEC | MMU_FLAG_WRITE, size);
 
   return (void *)(virt + offset);
 }
