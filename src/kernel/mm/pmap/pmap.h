@@ -11,7 +11,7 @@
 #define MMU_FLAG_WRITE   (1 << 1)
 #define MMU_FLAG_USER    (1 << 2)
 #define MMU_FLAG_NO_EXEC (1 << 3)
-#define MMU_FLAG_DEVICE  (1 << 4)
+#define MMU_FLAG_UC      (1 << 4)
 
 struct page_table_t;
 

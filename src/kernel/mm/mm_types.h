@@ -4,7 +4,6 @@
 #include <stdint.h>
 
 #define PAGE_SIZE             4096
-#define PAGE_HUGE             (1ull << 7)
 #define PAGE_SIZE_2M          0x200000ull
 #define KB_TO_PAGES(kb)       (((kb) * 1024) / PAGE_SIZE)
 #define BYTES_TO_PAGES(bytes) ((bytes) / PAGE_SIZE)

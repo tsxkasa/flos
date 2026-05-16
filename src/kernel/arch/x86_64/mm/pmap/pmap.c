@@ -1,3 +1,4 @@
+#include "mm/mm_types.h"
 #include "mm/vm/vm_map.h"
 #include <cpu/halt.h>
 #include <kernel/printk.h>
@@ -9,10 +10,26 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define PAGE_PRESENT (1ull << 0)
-#define PAGE_RW      (1ull << 1)
-#define PAGE_USER    (1ull << 2)
-#define PAGE_XD      (1ull << 63)
+#define TABLE_LEVEL_PT   1
+#define TABLE_LEVEL_PD   2
+#define TABLE_LEVEL_PDPT 3
+
+#define PAGE_PRESENT  (1ull << 0)
+#define PAGE_RW       (1ull << 1)
+#define PAGE_USER     (1ull << 2)
+#define PAGE_PWT      (1ull << 3)
+#define PAGE_PCD      (1ull << 4)
+#define PAGE_ACCESSED (1ull << 5)
+#define PAGE_XD       (1ull << 63)
+
+#define PTE_DIRTY  (1ULL << 6)
+#define PTE_PAT    (1ULL << 7)
+#define PTE_GLOBAL (1ULL << 8)
+
+#define PDE_PS     (1ULL << 7) /* 2 MiB page */
+#define PDE_GLOBAL (1ULL << 8)
+
+#define PDPTE_PS (1ULL << 7) /* 1 GiB page */
 
 #define GET_PML4_IDX(vaddr) (((vaddr) >> 39) & 0x1ff)
 #define GET_PDPT_IDX(vaddr) (((vaddr) >> 30) & 0x1ff)
@@ -136,15 +153,24 @@ static uint64_t *get_next_level(uint64_t *current_table, uint16_t index,
   return next_virt;
 }
 
-bool pmap_map_page(struct page_table_t *table, uintptr_t virt, uintptr_t phys,
-                   uint32_t flags) {
+static uint64_t parse_arch_flags(uint32_t flags, int table_level) {
   uint64_t arch_flags = PAGE_PRESENT;
   if (flags & MMU_FLAG_WRITE)
     arch_flags |= PAGE_RW;
   if (flags & MMU_FLAG_USER)
     arch_flags |= PAGE_USER;
+  if (flags & MMU_FLAG_UC) {
+    arch_flags |= PAGE_PCD;
+    arch_flags &= ~PAGE_PWT;
+  }
   if (flags & MMU_FLAG_NO_EXEC)
     arch_flags |= PAGE_XD;
+  return arch_flags;
+}
+
+bool pmap_map_page(struct page_table_t *table, uintptr_t virt, uintptr_t phys,
+                   uint32_t flags) {
+  uint64_t arch_flags = parse_arch_flags(flags, TABLE_LEVEL_PT);
 
   uint16_t pml4_idx = GET_PML4_IDX(virt);
   uint16_t pdpt_idx = GET_PDPT_IDX(virt);
@@ -171,13 +197,8 @@ bool pmap_map_page(struct page_table_t *table, uintptr_t virt, uintptr_t phys,
 
 bool pmap_map_page_2m(struct page_table_t *table, uintptr_t virt,
                       uintptr_t phys, uint32_t flags) {
-  uint64_t arch_flags = PAGE_PRESENT | PAGE_HUGE; // Notice PAGE_HUGE
-  if (flags & MMU_FLAG_WRITE)
-    arch_flags |= PAGE_RW;
-  if (flags & MMU_FLAG_USER)
-    arch_flags |= PAGE_USER;
-  if (flags & MMU_FLAG_NO_EXEC)
-    arch_flags |= PAGE_XD;
+  uint64_t arch_flags = parse_arch_flags(flags, TABLE_LEVEL_PT);
+  arch_flags |= PDE_PS; // TODO: actually make flags important
 
   uint16_t pml4_idx = GET_PML4_IDX(virt);
   uint16_t pdpt_idx = GET_PDPT_IDX(virt);
