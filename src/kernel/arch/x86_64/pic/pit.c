@@ -1,6 +1,6 @@
 #include <asm/io.h>
 #include <interrupts/isr.h>
-#include <kernel/printk.h>
+#include <printk.h>
 #include <pic/pic.h>
 #include <pic/pit.h>
 #include <stdint.h>

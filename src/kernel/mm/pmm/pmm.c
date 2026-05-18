@@ -1,8 +1,8 @@
 #include <boot/boot.h>
 #include <cpu/halt.h>
-#include <kernel/bitmap.h>
-#include <kernel/printk.h>
-#include <kernel/string.h>
+#include <bitmap.h>
+#include <printk.h>
+#include <string.h>
 #include <limits.h>
 #include <mm/address.h>
 #include <mm/mm_types.h>

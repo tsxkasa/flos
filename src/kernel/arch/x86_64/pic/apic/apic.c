@@ -1,4 +1,4 @@
-#include <kernel/printk.h>
+#include <printk.h>
 #include <pic/apic/apic.h>
 #include <pic/apic/lapic.h>
 #include <pic/pic.h>

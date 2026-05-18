@@ -2,8 +2,8 @@
 #include "mm/pmap/pmap.h"
 #include "mm/vm/vm_area.h"
 #include <cpu/halt.h>
-#include <kernel/printk.h>
-#include <kernel/string.h>
+#include <printk.h>
+#include <string.h>
 #include <mm/address.h>
 #include <mm/pmm/pmm.h>
 #include <mm/vm/slab.h>

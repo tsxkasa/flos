@@ -1,4 +1,4 @@
-#include <kernel/sys/io.h>
+#include <sys/io.h>
 #include <pic/pic.h>
 
 #define PIC1         0x20       // I/O base address for master PIC

@@ -1,7 +1,7 @@
 #ifndef _KERNEL_PMM_H
 #define _KERNEL_PMM_H
 
-#include <kernel/bitmap.h>
+#include <bitmap.h>
 #include <stddef.h>
 #include <stdint.h>
 

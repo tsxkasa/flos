@@ -1,8 +1,8 @@
 #include "mm/mm_types.h"
 #include "mm/vm/vm_map.h"
 #include <cpu/halt.h>
-#include <kernel/printk.h>
-#include <kernel/string.h>
+#include <printk.h>
+#include <string.h>
 #include <mm/address.h>
 #include <mm/pmap/pmap.h>
 #include <mm/pmm/pmm.h>

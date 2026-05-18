@@ -34,7 +34,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <kernel/kprintf.h>
+#include <kprintf.h>
 
 #define PRINTF_DISABLE_SUPPORT_FLOAT 1 // disable for now
 

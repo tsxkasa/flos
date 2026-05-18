@@ -66,7 +66,7 @@
 #define LAPIC_ICR_DEST_ALL          (2 << 18)
 #define LAPIC_ICR_DEST_ALL_BUT_SELF (3 << 18)
 
-#include <kernel/printk.h>
+#include <printk.h>
 #include <stdint.h>
 
 static volatile void *lapic_base;

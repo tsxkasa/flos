@@ -1,8 +1,8 @@
 #include <drivers/input/ps2/keyboard/keyboard.h>
 #include <drivers/tty/tty.h>
 #include <interrupts/isr.h>
-#include <kernel/printk.h>
-#include <kernel/sys/io.h>
+#include <printk.h>
+#include <sys/io.h>
 #include <pic/pic.h>
 #include <stdint.h>
 

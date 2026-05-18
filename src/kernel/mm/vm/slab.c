@@ -1,5 +1,5 @@
-#include <kernel/kassert.h>
-#include <kernel/string.h>
+#include <kassert.h>
+#include <string.h>
 #include <mm/address.h>
 #include <mm/mm_types.h>
 #include <mm/pmm/pmm.h>

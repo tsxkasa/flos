@@ -5,20 +5,19 @@
 #include <gdt.h>
 #include <interrupts/idt.h>
 #include <interrupts/isr.h>
-#include <kernel/printk.h>
 #include <mm/mm_types.h>
+#include <printk.h>
 
-#include <kernel/kassert.h>
-#include <kernel/stdlib.h>
+#include <kassert.h>
 #include <mm/pmap/pmap.h>
 #include <mm/pmm/pmm.h>
 #include <mm/vm/vm_map.h>
+#include <stdlib.h>
 
 #include <pic/apic/apic.h>
 #include <pic/pic.h>
 #include <pic/pit.h>
 
-#include <kernel/string.h>
 #include <stdbool.h>
 #include <uacpi/uacpi.h>
 

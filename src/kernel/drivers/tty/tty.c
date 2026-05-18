@@ -2,8 +2,8 @@
 #include <drivers/tty/tty.h>
 #include <drivers/video/font/psf_font.h>
 #include <drivers/video/framebuffer/framebuffer.h>
-#include <kernel/printk.h>
-#include <kernel/string.h>
+#include <printk.h>
+#include <string.h>
 #include <stdint.h>
 
 #define MAX_ROWS 512

@@ -3,7 +3,7 @@ HOSTARCH := x86_64
 GCC_ARCH := x86_64-elf
 
 # User controllable toolchain and toolchain prefix.
-TOOLCHAIN ?= llvm
+TOOLCHAIN ?=
 TOOLCHAIN_PREFIX ?=
 
 ifneq ($(TOOLCHAIN), llvm)
@@ -44,7 +44,7 @@ DEBUG ?= 0
 RELEASE ?= 0
 # Global C Flags
 ifeq ($(DEBUG), 1)
-CFLAGS ?= -O0 -ggdb -pipe -DDEBUG 
+CFLAGS ?= -O0 -ggdb -pipe -DDEBUG
 else ifeq ($(RELEASE), 1)
 CFLAGS ?= -O3 -DNDEBUG
 else

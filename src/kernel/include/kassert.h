@@ -2,7 +2,7 @@
 #define _KERNEL_ASSERT_H
 
 #include <cpu/halt.h>
-#include <kernel/printk.h>
+#include <printk.h>
 #include <stdbool.h>
 
 #ifdef NDEBUG

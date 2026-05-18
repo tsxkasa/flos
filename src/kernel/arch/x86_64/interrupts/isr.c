@@ -1,6 +1,6 @@
 #include <asm/interrupts.h>
 #include <interrupts/isr.h>
-#include <kernel/printk.h>
+#include <printk.h>
 #include <stdint.h>
 
 static interrupt_handler_t *interrupt_handlers[256];

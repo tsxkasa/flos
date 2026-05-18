@@ -1,8 +1,8 @@
 #include "mm/address.h"
 #include <asm/interrupts.h>
 #include <boot/boot.h>
-#include <kernel/printk.h>
-#include <kernel/stdlib.h>
+#include <printk.h>
+#include <stdlib.h>
 #include <mm/mm_types.h>
 #include <mm/pmap/pmap.h>
 #include <mm/vm/vm_map.h>

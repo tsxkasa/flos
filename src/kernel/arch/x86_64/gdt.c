@@ -1,5 +1,5 @@
 #include <gdt.h>
-#include <kernel/printk.h>
+#include <printk.h>
 
 extern void _load_gdt(struct gdtr_t *gdt);
 

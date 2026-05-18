@@ -2,11 +2,11 @@
 #include <boot/boot.h>
 #include <cpu/halt.h>
 #include <interrupts/isr.h>
-#include <kernel/printk.h>
 #include <mm/address.h>
 #include <mm/memory_map.h>
 #include <mm/pmap/pmap.h>
 #include <mm/vm/slab.h>
+#include <printk.h>
 #include <stddef.h>
 #include <stdint.h>
 

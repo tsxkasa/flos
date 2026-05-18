@@ -1,7 +1,7 @@
 #include <drivers/tty/tty.h>
-#include <kernel/kprintf.h>
-#include <kernel/printk.h>
-#include <kernel/string.h>
+#include <kprintf.h>
+#include <printk.h>
+#include <string.h>
 #include <stdarg.h>
 
 #define PRINTK_BUF_SIZE 8192

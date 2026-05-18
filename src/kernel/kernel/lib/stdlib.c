@@ -1,6 +1,6 @@
-#include <kernel/kassert.h>
-#include <kernel/printk.h>
-#include <kernel/stdlib.h>
+#include <kassert.h>
+#include <printk.h>
+#include <stdlib.h>
 #include <mm/address.h>
 #include <mm/mm_types.h>
 #include <mm/pmm/pmm.h>
