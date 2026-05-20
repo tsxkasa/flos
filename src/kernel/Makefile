@@ -56,7 +56,7 @@ $(OBJDIR)/%.S.o: %.S
 
 $(OBJDIR)/%.asm.o: %.asm
 	@mkdir -p $(@D)
-	nasm $(NASMFLAGS) $< -o $@
+	nasm $(NASMFLAGS) -Iarch/$(HOSTARCH)/asm $< -o $@
 
 $(OBJDIR)/%.psf.o: %.psf
 	@mkdir -p $(@D)
