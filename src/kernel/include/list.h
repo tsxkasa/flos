@@ -2,7 +2,7 @@
 #ifndef _KERNEL_LIST_H
 #define _KERNEL_LIST_H
 
-#include <kernel/container_of.h>
+#include <include/container_of.h>
 #include <stdbool.h>
 #include <stddef.h>
 
