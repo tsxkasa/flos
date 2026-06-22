@@ -15,7 +15,7 @@
  * WARNING: any const qualifier of @ptr is lost.
  * Do not use container_of() in new code.
  */
-#define container_of(ptr, type, macro)                                         \
+#define container_of(ptr, type, member)                                        \
   ({                                                                           \
     void *__mptr = (void *)(ptr);                                              \
     ((type *)(__mptr - offsetof(type, member)));                               \
