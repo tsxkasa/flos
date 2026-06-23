@@ -81,7 +81,7 @@ void init_pmap(void) {
 #undef KPHYS
 
   register_interrupt_handler(0xE, pf_interrupt_handler);
-  pmap_switch(kernel_vm_map->page_table);
+  pmap_switch_pt(kernel_vm_map->page_table);
 
   printk(LOG_INFO "pmap initialized\n");
   printk(LOG_INFO "pmap: switched to kernel page table\n");

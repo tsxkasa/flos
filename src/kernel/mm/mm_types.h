@@ -16,6 +16,8 @@
 
 #define VM_ALLOC_BASE 0x1000
 
+#define STACK_SIZE 0x2000
+
 typedef struct {
   uint64_t phys;
   uint64_t virt;

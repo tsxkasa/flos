@@ -1,14 +1,14 @@
 #include "mm/mm_types.h"
 #include "mm/vm/vm_map.h"
 #include <cpu/halt.h>
-#include <printk.h>
-#include <string.h>
 #include <mm/address.h>
 #include <mm/pmap/pmap.h>
 #include <mm/pmm/pmm.h>
 #include <mm/vm/slab.h>
+#include <printk.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #define PAGE_PRESENT  (1ull << 0)
 #define PAGE_RW       (1ull << 1)
@@ -311,6 +311,8 @@ uintptr_t pmap_unmap_page(struct page_table_t *table, uintptr_t virt) {
   return pa;
 }
 
-void pmap_switch(struct page_table_t *table) {
+void pmap_switch(uintptr_t phy) { asm volatile("mov %0, %%cr3" : : "r"(phy)); }
+
+void pmap_switch_pt(struct page_table_t *table) {
   asm volatile("mov %0, %%cr3" : : "r"(table->pml4_phy));
 }

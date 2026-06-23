@@ -68,8 +68,15 @@ void pmap_map_mmio(uintptr_t phys, size_t size);
 /**
  * @brief switches the context register
  *
- * @param table the table to switch the paging context to
+ * @param table the table to switch page table to
  */
-void pmap_switch(struct page_table_t *table);
+void pmap_switch_pt(struct page_table_t *table);
+
+/**
+ * @brief switches the context register
+ *
+ * @param the physical address of the new page table
+ */
+void pmap_switch(uintptr_t phy);
 
 #endif // _KERNEL_PMAP_H
