@@ -12,7 +12,6 @@ _isr_handler:
   call interrupt_handler
 
   popa64
-
   add rsp, 16
 
   iretq

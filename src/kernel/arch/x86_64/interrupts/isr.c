@@ -1,6 +1,7 @@
 #include <asm/interrupts.h>
 #include <interrupts/isr.h>
 #include <printk.h>
+#include <sched/scheduler.h>
 #include <stdint.h>
 
 static interrupt_handler_t *interrupt_handlers[256];
@@ -92,5 +93,4 @@ void interrupt_handler(struct interrupt_frame *frame) {
     while (1)
       __asm__ volatile("cli; hlt");
   }
-  return;
 }

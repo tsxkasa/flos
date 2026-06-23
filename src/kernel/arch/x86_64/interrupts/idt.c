@@ -1,6 +1,6 @@
 #include <interrupts/idt.h>
-#include <printk.h>
 #include <pic/pic.h>
+#include <printk.h>
 #include <stdbool.h>
 #include <stdint.h>
 
