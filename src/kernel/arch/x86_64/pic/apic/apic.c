@@ -1,7 +1,7 @@
-#include <printk.h>
 #include <pic/apic/apic.h>
 #include <pic/apic/lapic.h>
 #include <pic/pic.h>
+#include <printk.h>
 #include <stdint.h>
 #include <uacpi/acpi.h>
 #include <uacpi/tables.h>
@@ -148,3 +148,5 @@ void init_apic(void) {
 
   printk(LOG_INFO "APIC initialized\n");
 }
+
+size_t apic_get_cpu_count() { return apic.cpu_count; }

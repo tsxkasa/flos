@@ -59,6 +59,13 @@ SECTIONS
     /* Move to the next memory page for .data */
     . = ALIGN(CONSTANT(MAXPAGESIZE));
 
+    _percpu_start = .;
+    .data..percpu : {
+      *(.data..percpu)
+      *(.data..percpu.*)
+    } :data
+    _percpu_end = .;
+
     _data_start = .;
     .data : {
         *(.data .data.*)

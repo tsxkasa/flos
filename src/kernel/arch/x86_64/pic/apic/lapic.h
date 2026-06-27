@@ -1,7 +1,10 @@
 #ifndef _KERNEL_LAPIC_H
 #define _KERNEL_LAPIC_H
 
+#include <cpu/percpu.h>
 #include <stdint.h>
+
+DECLARE_PERCPU(uint64_t, counter);
 
 void init_lapic(void);
 void lapic_eoi(void);

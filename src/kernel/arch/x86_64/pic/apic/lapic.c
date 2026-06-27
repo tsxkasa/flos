@@ -1,9 +1,14 @@
+#include <asm/interrupts.h>
+#include <asm/msr.h>
 #include <boot/boot.h>
+#include <cpu/percpu.h>
 #include <interrupts/isr.h>
 #include <mm/mm_types.h>
 #include <mm/pmap/pmap.h>
 #include <pic/apic/lapic.h>
 #include <pic/pit.h>
+#include <printk.h>
+#include <sched/scheduler.h>
 
 #define LAPIC_REG_ID            0x020 // Local APIC ID Register
 #define LAPIC_REG_VERSION       0x030 // LAPIC Version Register
@@ -66,11 +71,8 @@
 #define LAPIC_ICR_DEST_ALL          (2 << 18)
 #define LAPIC_ICR_DEST_ALL_BUT_SELF (3 << 18)
 
-#include <printk.h>
-#include <stdint.h>
-
 static volatile void *lapic_base;
-static volatile uint64_t lapic_ticks;
+DEFINE_PERCPU(uint64_t, counter);
 
 static inline uint32_t lapic_read(uint32_t reg) {
   return *(volatile uint32_t *)((uint8_t *)lapic_base + reg);
@@ -80,30 +82,21 @@ static inline void lapic_write(uint32_t reg, uint32_t val) {
   *(volatile uint32_t *)((uint8_t *)lapic_base + reg) = val;
 }
 
-static inline uint64_t rdmsr(uint32_t msr) {
-  uint32_t lo, hi;
-  __asm__ volatile("rdmsr" : "=a"(lo), "=d"(hi) : "c"(msr));
-  return ((uint64_t)hi << 32) | lo;
-}
-
-static inline void wrmsr(uint32_t msr, uint64_t val) {
-  uint32_t lo = (uint32_t)val;
-  uint32_t hi = (uint32_t)(val >> 32);
-  __asm__ volatile("wrmsr" : : "c"(msr), "a"(lo), "d"(hi));
-}
-
 static void spurious_handler(struct interrupt_frame *frame) {
   lapic_eoi();
   return;
 }
 
-static void lapic_timer_hander(struct interrupt_frame *frame) {
-  lapic_ticks++;
+static void lapic_timer_handler(struct interrupt_frame *frame) {
+  this_cpu_inc(counter);
+  uint64_t t = this_cpu_read(counter);
   lapic_eoi();
-  if (lapic_ticks % 1000 == 0) {
-    printk(LOG_DEBUG "LAPIC: %u seconds passed, ticks at: %llu\n",
-           lapic_ticks / 1000, lapic_ticks);
+  if (t % 1000 == 0) {
+    printk(LOG_DEBUG "LAPIC: %u seconds passed, ticks at: %llu\n", t / 1000, t);
   }
+
+  // read time slice from this cpu and sched it
+
   return;
 }
 
@@ -152,7 +145,7 @@ void init_lapic(void) {
   printk(LOG_INFO "LAPIC id=%u initialized\n", lapic_read(LAPIC_REG_ID) >> 24);
 
   register_interrupt_handler(0xFF, spurious_handler);
-  register_interrupt_handler(INTERRUPT_TIMER_VECTOR, lapic_timer_hander);
+  register_interrupt_handler(INTERRUPT_TIMER_VECTOR, lapic_timer_handler);
 
   lapic_timer_calibrate();
 

@@ -39,4 +39,6 @@ struct apic_info {
 
 void init_apic(void);
 
+size_t apic_get_cpu_count();
+
 #endif // _KERNEL_APIC_H
