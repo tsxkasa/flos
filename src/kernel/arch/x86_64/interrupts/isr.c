@@ -91,6 +91,6 @@ void interrupt_handler(struct interrupt_frame *frame) {
            frame->rsp, frame->rflags, frame->cs, frame->rip);
 
     while (1)
-      __asm__ volatile("cli; hlt");
+      __asm__ __volatile__("cli; hlt");
   }
 }

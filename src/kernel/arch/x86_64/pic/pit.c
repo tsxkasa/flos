@@ -1,8 +1,8 @@
 #include <asm/io.h>
 #include <interrupts/isr.h>
-#include <printk.h>
 #include <pic/pic.h>
 #include <pic/pit.h>
+#include <printk.h>
 #include <stdint.h>
 
 #define PIT_CHANNEL0 0x40
@@ -81,6 +81,6 @@ void pit_sleep(uint32_t ms) {
     }
 
     last_tick = current_tick;
-    asm volatile("pause");
+    __asm__ __volatile__("pause");
   }
 }

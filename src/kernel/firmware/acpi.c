@@ -1,13 +1,13 @@
 #include "mm/address.h"
 #include <asm/interrupts.h>
 #include <boot/boot.h>
-#include <printk.h>
-#include <stdlib.h>
 #include <mm/mm_types.h>
 #include <mm/pmap/pmap.h>
 #include <mm/vm/vm_map.h>
+#include <printk.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <uacpi/kernel_api.h>
 #include <uacpi/log.h>

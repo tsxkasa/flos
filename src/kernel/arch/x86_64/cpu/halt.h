@@ -3,7 +3,7 @@
 // Halt and catch fire function.
 [[noreturn]] static inline void hcf(void) {
   for (;;) {
-    asm("hlt");
+    __asm__("hlt");
   }
 }
 

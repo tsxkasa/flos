@@ -188,7 +188,7 @@ static uint64_t map(struct page_table_t *table, uintptr_t virt, uintptr_t phys,
 
   pt[pt_idx] = phys | arch_flags;
 
-  asm volatile("invlpg (%0)" : : "r"(virt) : "memory");
+  __asm__ __volatile__("invlpg (%0)" : : "r"(virt) : "memory");
 
   return PAGE_SIZE;
 }
@@ -209,7 +209,7 @@ static uint64_t map_2m(struct page_table_t *table, uintptr_t virt,
 
   pd[pd_idx] = phys | arch_flags;
 
-  asm volatile("invlpg (%0)" : : "r"(virt) : "memory");
+  __asm__ __volatile__("invlpg (%0)" : : "r"(virt) : "memory");
 
   return PAGE_SIZE_2M;
 }
@@ -225,7 +225,7 @@ static uint64_t map_1g(struct page_table_t *table, uintptr_t virt,
 
   pdpt[pdpt_idx] = phys | arch_flags;
 
-  asm volatile("invlpg (%0)" : : "r"(virt) : "memory");
+  __asm__ __volatile__("invlpg (%0)" : : "r"(virt) : "memory");
 
   return PAGE_SIZE_1G;
 }
@@ -307,12 +307,14 @@ uintptr_t pmap_unmap_page(struct page_table_t *table, uintptr_t virt) {
 
   uintptr_t pa = pt[pt_idx] & PAGE_PHYS_MASK;
   pt[pt_idx] = 0;
-  asm volatile("invlpg (%0)" : : "r"(virt) : "memory");
+  __asm__ __volatile__("invlpg (%0)" : : "r"(virt) : "memory");
   return pa;
 }
 
-void pmap_switch(uintptr_t phy) { asm volatile("mov %0, %%cr3" : : "r"(phy)); }
+void pmap_switch(uintptr_t phy) {
+  __asm__ __volatile__("mov %0, %%cr3" : : "r"(phy));
+}
 
 void pmap_switch_pt(struct page_table_t *table) {
-  asm volatile("mov %0, %%cr3" : : "r"(table->pml4_phy));
+  __asm__ __volatile__("mov %0, %%cr3" : : "r"(table->pml4_phy));
 }
