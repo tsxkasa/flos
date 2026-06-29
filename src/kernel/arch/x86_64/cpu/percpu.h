@@ -8,7 +8,7 @@ extern char _percpu_start[];
 extern char _percpu_end[];
 
 #define DEFINE_PERCPU(type, name)                                              \
-  __attribute__((used, section(".data..percpu"))) type name
+  __attribute__((section(".data..percpu"))) type name
 
 #define DECLARE_PERCPU(type, name)                                             \
   extern __attribute__((section(".data..percpu"))) type name

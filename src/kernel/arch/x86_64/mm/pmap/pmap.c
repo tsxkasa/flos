@@ -2,6 +2,7 @@
 #include "mm/vm/vm_map.h"
 #include <cpu/halt.h>
 #include <mm/address.h>
+#include <mm/pmap/arch_pmap_types.h>
 #include <mm/pmap/pmap.h>
 #include <mm/pmm/pmm.h>
 #include <mm/vm/slab.h>
@@ -34,13 +35,6 @@
 
 #define PAGE_PHYS_MASK     0x000FFFFFFFFFF000ull
 #define PAGE_TABLE_ENTRIES 512u
-
-extern vm_map_t *kernel_vm_map;
-
-struct page_table_t {
-  uint64_t *pml4_virt;
-  uintptr_t pml4_phy;
-};
 
 static struct kmem_cache *page_table_cache;
 
