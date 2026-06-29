@@ -1,6 +1,7 @@
 HOST ?= x86_64-unknown-none-elf
 HOSTARCH := x86_64
 GCC_ARCH := x86_64-elf
+HOST_CC := gcc 
 
 # User controllable toolchain and toolchain prefix.
 TOOLCHAIN ?=
@@ -8,6 +9,7 @@ TOOLCHAIN_PREFIX ?=
 
 ifneq ($(TOOLCHAIN), llvm)
 	TOOLCHAIN_PREFIX = $(GCC_ARCH)-
+	HOST_CC := clang
 endif
 
 ifeq ($(TOOLCHAIN),llvm)

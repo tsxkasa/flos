@@ -11,4 +11,6 @@ build/
 sysroot/
 iso_root/
 
+src/kernel/arch/*/generated
+
 .dev
