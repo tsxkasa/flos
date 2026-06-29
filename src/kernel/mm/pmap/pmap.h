@@ -14,6 +14,10 @@
 #define MMU_FLAG_UC      (1 << 4)
 #define MMU_FLAG_HUGE_OK (1 << 5)
 
+typedef struct vm_map vm_map_t;
+
+extern vm_map_t *kernel_vm_map;
+
 struct page_table_t;
 
 struct page_table_t *pmap_create_table(void);
