@@ -12,8 +12,6 @@
 #include <uacpi/kernel_api.h>
 #include <uacpi/log.h>
 
-extern vm_map_t *kernel_vm_map;
-
 uacpi_status uacpi_kernel_get_rsdp(uacpi_phys_addr *out_rsdp_address) {
   *out_rsdp_address = higher_half_data_to_phys((uintptr_t)boot_get_rsdp());
   return UACPI_STATUS_OK;
