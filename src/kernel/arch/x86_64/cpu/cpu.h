@@ -3,6 +3,7 @@
 
 #include <pic/apic/apic.h>
 #include <stddef.h>
+#include <stdint.h>
 
 inline size_t get_cpu_count() { return apic_get_cpu_count(); }
 

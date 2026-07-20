@@ -39,13 +39,13 @@ extern char _percpu_end[];
 #define this_cpu_inc(var)                                                      \
   do {                                                                         \
     uintptr_t __off = PERCPU_OFFSET(var);                                      \
-    __asm__ __volatile__("incq %%gs:(%0)" : : "r"(__off) : "memory");          \
+    __asm__ __volatile__("lock incq %%gs:(%0)" : : "r"(__off) : "memory");     \
   } while (0)
 
 #define this_cpu_dec(var)                                                      \
   do {                                                                         \
     uintptr_t __off = PERCPU_OFFSET(var);                                      \
-    __asm__ __volatile__("decq %%gs:(%0)" : : "r"(__off) : "memory");          \
+    __asm__ __volatile__("lock decq %%gs:(%0)" : : "r"(__off) : "memory");     \
   } while (0)
 
 void init_percpu();
