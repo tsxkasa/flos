@@ -52,7 +52,7 @@ isr_no_err_stub 31
 %assign i 32
 %rep 224
 isr_stub_%+i:
-    push 0 
+    push 0
     push i
     jmp _isr_handler
 %assign i i+1
@@ -60,10 +60,10 @@ isr_stub_%+i:
 
 global _isr_stub_table
 _isr_stub_table:
-%assign i 0 
+%assign i 0
 %rep    256
     dq isr_stub_%+i 
-%assign i i+1 
+%assign i i+1
 %endrep
 
 global _load_idt
