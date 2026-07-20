@@ -9,6 +9,10 @@
 #define KB_TO_PAGES(kb)       (((kb) * 1024) / PAGE_SIZE)
 #define BYTES_TO_PAGES(bytes) ((bytes) / PAGE_SIZE)
 
+#define KSTACK_ORDER 1
+#define KSTACK_PAGES (1 << KSTACK_ORDER)
+#define KSTACK_SIZE  (PAGE_SIZE * KSTACK_PAGES)
+
 #define ALIGN_DOWN(addr, align) ((addr) & ~((align) - 1))
 #define ALIGN_UP(addr, align)   (((addr) + (align) - 1) & ~((align) - 1))
 

@@ -14,7 +14,7 @@
 #include <mm/pmm/pmm.h>
 #include <mm/vm/vm_map.h>
 #include <sched/scheduler.h>
-#include <sched/thread.h>
+#include <sched/task.h>
 #include <stdlib.h>
 
 #include <pic/apic/apic.h>
@@ -23,6 +23,20 @@
 
 #include <stdbool.h>
 #include <uacpi/uacpi.h>
+
+void test_proc1(void *_) {
+  while (1) {
+    printk(LOG_DEBUG "Executed test_proc\n");
+  }
+}
+
+void bsp(void *_) {
+  task_t *test = kthread_create(test_proc1, 0);
+  ktask_wake(test);
+  while (1) {
+    printk(LOG_DEBUG "Executed bsp\n");
+  }
+}
 
 // entry point
 void kmain(void) {
@@ -46,6 +60,9 @@ void kmain(void) {
   init_percpu(); // dependent on kmalloc
 
   init_keyboard();
+
+  init_scheduler();
+  sched_run_bsp(bsp);
 
   printk("Hello kernel!\n");
 

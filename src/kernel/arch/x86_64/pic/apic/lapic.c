@@ -9,6 +9,7 @@
 #include <pic/pit.h>
 #include <printk.h>
 #include <sched/scheduler.h>
+#include <sched/task.h>
 
 #define LAPIC_REG_ID            0x020 // Local APIC ID Register
 #define LAPIC_REG_VERSION       0x030 // LAPIC Version Register
@@ -95,7 +96,15 @@ static void lapic_timer_handler(struct interrupt_frame *frame) {
     printk(LOG_DEBUG "LAPIC: %u seconds passed, ticks at: %llu\n", t / 1000, t);
   }
 
-  // read time slice from this cpu and sched it
+  task_t *cur = this_cpu_read(current_task);
+  if (++cur->sched.time_slice >= MAX_SLICES) {
+    cur->sched.time_slice = 0;
+    this_cpu_write(need_resched, true);
+  }
+
+  if (this_cpu_read(need_resched)) {
+    schedule();
+  }
 
   return;
 }
@@ -148,9 +157,6 @@ void init_lapic(void) {
   register_interrupt_handler(INTERRUPT_TIMER_VECTOR, lapic_timer_handler);
 
   lapic_timer_calibrate();
-
-  lapic_timer_start(1000);
-
 #undef IA32_APIC_BASE_MSR
 #undef APIC_ENABLE
 }
