@@ -15,6 +15,18 @@ extern char _percpu_end[];
 
 #define PERCPU_OFFSET(var) ((uintptr_t)&(var) - (uintptr_t)_percpu_start)
 
+#define this_cpu_ptr(var)                                                      \
+  ({                                                                           \
+    typeof(&(var)) __p;                                                        \
+    uintptr_t __off = PERCPU_OFFSET(var);                                      \
+    __asm__ __volatile__("mov %%gs:0, %0\n\t"                                  \
+                         "add %1, %0"                                          \
+                         : "=&r"(__p)                                          \
+                         : "r"(__off)                                          \
+                         : "memory");                                          \
+    __p;                                                                       \
+  })
+
 #define this_cpu_read(var)                                                     \
   ({                                                                           \
     typeof(var) __v;                                                           \
