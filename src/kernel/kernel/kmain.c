@@ -30,11 +30,19 @@ void test_proc1(void *_) {
   }
 }
 
+void test_proc2(void *_) {
+  while (1) {
+    printk(LOG_DEBUG "Executed test_proc2\n");
+  }
+}
+
 void bsp(void *_) {
   task_t *test = kthread_create(test_proc1, 0);
   ktask_wake(test);
+  task_t *test2 = kthread_create(test_proc2, 0);
+  ktask_wake(test2);
   while (1) {
-    printk(LOG_DEBUG "Executed bsp\n");
+    printk(LOG_DEBUG "Executed bsp, arg %llx\n", _);
   }
 }
 
@@ -42,7 +50,7 @@ void bsp(void *_) {
 void kmain(void) {
   boot_init();
   tty_init();
-  init_gdt();
+  init_boot_gdt();
   init_idt();
 
   init_bitmap_pmm();

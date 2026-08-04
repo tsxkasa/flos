@@ -57,7 +57,7 @@ static struct gdtr_t gdt = {
 
 static struct tss_t tss;
 
-void init_gdt(void) {
+void init_boot_gdt(void) {
   // zeroes
   for (uint64_t i = 0; i < sizeof(tss); i++)
     ((uint8_t *)(void *)&tss)[i] = 0;

@@ -1,6 +1,9 @@
 #ifndef _KERNEL_GDT_H
 #define _KERNEL_GDT_H
 
+struct tss_t;
+
+#include <cpu/percpu.h>
 #include <stdint.h>
 
 struct gdtr_t {
@@ -35,6 +38,6 @@ struct tss_t {
   uint16_t iopb_offset;
 } __attribute__((packed));
 
-void init_gdt(void);
+void init_boot_gdt(void);
 
 #endif // _KERNEL_GDT_H
