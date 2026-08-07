@@ -3,52 +3,45 @@
 
 extern void _load_gdt(struct gdtr_t *gdt);
 
-static struct gdt_desc gdt_descs[] = {
-    // 0x0: null
-    {0},
+static struct gdt_desc gdt_descs[GDT_ENTRIES] = {
+    [GDT_ENTRY_NULL] = {0},
 
-    // 0x8: kernel code
-    {.limit = 0xffff,
-     .base_low = 0x0000,
-     .base_mid = 0x00,
-     .access = 0x9a,
-     .granularity = 0xa0,
-     .base_hi = 0x00},
+    [GDT_ENTRY_KERNEL_CS] = {.limit = 0xffff,
+                             .base_low = 0x0000,
+                             .base_mid = 0x00,
+                             .access = 0x9a,
+                             .granularity = 0xa0,
+                             .base_hi = 0x00},
 
-    // 0x10: kernel data
-    {.limit = 0xffff,
-     .base_low = 0x0000,
-     .base_mid = 0x00,
-     .access = 0x92,
-     .granularity = 0xc0,
-     .base_hi = 0x00},
+    [GDT_ENTRY_KERNEL_DS] = {.limit = 0xffff,
+                             .base_low = 0x0000,
+                             .base_mid = 0x00,
+                             .access = 0x92,
+                             .granularity = 0xc0,
+                             .base_hi = 0x00},
 
-    // 0x18: usermode data
-    {.limit = 0xffff,
-     .base_low = 0x0000,
-     .base_mid = 0x00,
-     .access = 0xf2,
-     .granularity = 0xc0,
-     .base_hi = 0x00},
+    [GDT_ENTRY_USER_DS] = {.limit = 0xffff,
+                           .base_low = 0x0000,
+                           .base_mid = 0x00,
+                           .access = 0xf2,
+                           .granularity = 0xc0,
+                           .base_hi = 0x00},
 
-    // 0x20: usermode code
-    {.limit = 0xffff,
-     .base_low = 0x0000,
-     .base_mid = 0x00,
-     .access = 0xfa,
-     .granularity = 0xa0,
-     .base_hi = 0x00},
+    [GDT_ENTRY_USER_CS] = {.limit = 0xffff,
+                           .base_low = 0x0000,
+                           .base_mid = 0x00,
+                           .access = 0xfa,
+                           .granularity = 0xa0,
+                           .base_hi = 0x00},
 
-    // 0x28: TSS descriptor low (base 0, limit 0)
-    {.limit = 0x0000,
-     .base_low = 0x0000,
-     .base_mid = 0x00,
-     .access = 0x89,
-     .granularity = 0xa0,
-     .base_hi = 0x00},
+    [GDT_ENTRY_TSS_LO] = {.limit = 0x0000,
+                          .base_low = 0x0000,
+                          .base_mid = 0x00,
+                          .access = 0x89,
+                          .granularity = 0xa0,
+                          .base_hi = 0x00},
 
-    // 0x30: TSS descriptor high (base upper = 0)
-    {0}};
+    [GDT_ENTRY_TSS_HI] = {0}};
 
 static struct gdtr_t gdt = {
     sizeof(gdt_descs) - 1,

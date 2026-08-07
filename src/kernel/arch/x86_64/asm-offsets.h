@@ -1,6 +1,7 @@
 #ifndef _ASM_OFFSETS_H
 #define _ASM_OFFSETS_H
 
+#include <gdt.h>
 #include <mm/pmap/arch_pmap_types.h>
 #include <mm/vm/vm_map.h>
 #include <sched/task.h>
@@ -10,5 +11,11 @@
 #define OFFSET_TASK_STACK offsetof(task_t, stack)
 #define OFFSET_TASK_VMMAP offsetof(task_t, vmap)
 #define OFFSET_VM_MAP_PT  offsetof(vm_map_t, page_table)
+
+#define GDT_USER_CS   GDT_SEL(GDT_ENTRY_USER_CS)
+#define GDT_KERNEL_CS GDT_SEL(GDT_ENTRY_KERNEL_CS)
+#define GDT_USER_DS   GDT_SEL(GDT_ENTRY_USER_DS)
+#define GDT_KERNEL_DS GDT_SEL(GDT_ENTRY_KERNEL_DS)
+#define GDT_TSS       GDT_SEL(GDT_ENTRY_TSS_LO)
 
 #endif // _ASM_OFFSETS_H

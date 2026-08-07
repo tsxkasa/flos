@@ -1,14 +1,15 @@
+%include "asm-offsets.inc"
 global _load_gdt
 
 ; void _load_gdt(struct gdtr_t *gdt);
 _load_gdt:
   cli ; clear interrupt before setting up idt
-  lgdt  [rdi] ; first arg in UNIX
+  lgdt  [rdi]
 
-  mov ax, 0x28 ; tss seg low
+  mov ax, GDT_TSS
   ltr ax
-  
-  mov ax, 0x10 ; kernel data seg
+ 
+  mov ax, GDT_KERNEL_DS
   mov ds, ax
   mov ss, ax
   mov es, ax
@@ -16,7 +17,7 @@ _load_gdt:
   mov gs, ax
 
   pop rdi
-  mov rax, 0x08 ; kernel code seg
+  mov rax, GDT_KERNEL_CS
   push rax ; push kernel code seg
   push rdi ; push return address
   retfq ; far return

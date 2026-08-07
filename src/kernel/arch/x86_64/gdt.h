@@ -38,6 +38,26 @@ struct tss_t {
   uint16_t iopb_offset;
 } __attribute__((packed));
 
+#define GDT_SEL(entry) ((entry) << 3)
+
+enum {
+  GDT_ENTRY_NULL,
+  GDT_ENTRY_KERNEL_CS,
+  GDT_ENTRY_KERNEL_DS,
+  GDT_ENTRY_USER_DS,
+  GDT_ENTRY_USER_CS,
+  GDT_ENTRY_TSS_LO,
+  GDT_ENTRY_TSS_HI,
+
+  GDT_ENTRIES
+};
+
+#define __KERNEL_CS GDT_ENTRY_SEL(GDT_ENTRY_KERNEL_CS)
+#define __KERNEL_DS GDT_ENTRY_SEL(GDT_ENTRY_KERNEL_DS)
+#define __USER_DS   GDT_ENTRY_SEL(GDT_ENTRY_USER_DS)
+#define __USER_CS   GDT_ENTRY_SEL(GDT_ENTRY_USER_CS)
+#define __TSS       GDT_ENTRY_SEL(GDT_ENTRY_TSS_LO)
+
 void init_boot_gdt(void);
 
 #endif // _KERNEL_GDT_H

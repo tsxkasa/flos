@@ -4,10 +4,22 @@
 int main() {
   printf("%%ifndef __ASM_OFFSETS_NASM_INC\n");
   printf("%%define __ASM_OFFSETS_NASM_INC\n");
-  printf("%%define OFFSET_PT_PHY %zu\n", OFFSET_PT_PHY);
-  printf("%%define OFFSET_TASK_STACK %zu\n", OFFSET_TASK_STACK);
-  printf("%%define OFFSET_TASK_VMMAP %zu\n", OFFSET_TASK_VMMAP);
-  printf("%%define OFFSET_VM_MAP_PT %zu\n", OFFSET_VM_MAP_PT);
+
+#define PRINT_DEFINE(x) printf("%%define " #x " %zu\n", (size_t)(x))
+
+  PRINT_DEFINE(OFFSET_PT_PHY);
+  PRINT_DEFINE(OFFSET_TASK_STACK);
+  PRINT_DEFINE(OFFSET_TASK_VMMAP);
+  PRINT_DEFINE(OFFSET_VM_MAP_PT);
+
+  PRINT_DEFINE(GDT_USER_CS);
+  PRINT_DEFINE(GDT_USER_DS);
+  PRINT_DEFINE(GDT_KERNEL_CS);
+  PRINT_DEFINE(GDT_KERNEL_DS);
+  PRINT_DEFINE(GDT_TSS);
+
+#undef PRINT_DEFINE
+
   printf("%%endif");
 
   return 0;
