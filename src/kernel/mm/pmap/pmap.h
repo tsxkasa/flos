@@ -70,6 +70,13 @@ uintptr_t pmap_unmap_page(struct page_table_t *table, uintptr_t virt);
 void pmap_map_mmio(uintptr_t phys, size_t size);
 
 /**
+ * @brief copies kernel mapping over to the provided pt
+ *
+ * @param table page table to copy kernel mapping to
+ */
+void pmap_copy_kernel_mappings(struct page_table_t *table);
+
+/**
  * @brief switches the context register
  *
  * @param table the table to switch page table to

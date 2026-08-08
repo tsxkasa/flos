@@ -2,15 +2,15 @@
 #include "mm/pmap/pmap.h"
 #include "mm/vm/vm_area.h"
 #include <cpu/halt.h>
-#include <printk.h>
-#include <string.h>
 #include <mm/address.h>
 #include <mm/pmm/pmm.h>
 #include <mm/vm/slab.h>
 #include <mm/vm/vm_map.h>
+#include <printk.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 static struct kmem_cache *vm_area_cache;
 static struct kmem_cache *vm_map_cache;
@@ -71,6 +71,7 @@ vm_map_t *vm_map_create(void) {
     kmem_cache_free(vm_map_cache, space);
     return NULL;
   }
+  // pmap_copy_kernel_mappings(space->page_table);
 
   space->areas = NULL;
   return space;

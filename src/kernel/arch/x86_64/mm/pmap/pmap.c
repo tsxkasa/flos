@@ -305,6 +305,16 @@ uintptr_t pmap_unmap_page(struct page_table_t *table, uintptr_t virt) {
   return pa;
 }
 
+void pmap_copy_kernel_mappings(struct page_table_t *table) {
+  if (!kernel_vm_map)
+    return;
+  struct page_table_t *k = kernel_vm_map->page_table;
+
+  for (int i = 256; i < 512; i++) {
+    table->pml4_virt[i] = k->pml4_virt[i];
+  }
+}
+
 void pmap_switch(uintptr_t phy) {
   __asm__ __volatile__("mov %0, %%cr3" : : "r"(phy));
 }
