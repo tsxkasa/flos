@@ -25,8 +25,6 @@
 #include <uacpi/uacpi.h>
 
 void umain(void *args) {
-  volatile int x = 1 + 1;
-  (void)x;
   for (;;) {
     __asm__ volatile("pause");
   }
