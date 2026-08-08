@@ -24,7 +24,7 @@
 #include <stdbool.h>
 #include <uacpi/uacpi.h>
 
-static void umain(void *args) {
+void umain(void *args) {
   volatile int x = 1 + 1;
   (void)x;
   for (;;) {

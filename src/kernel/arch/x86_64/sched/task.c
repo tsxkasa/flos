@@ -123,9 +123,8 @@ __attribute__((noreturn)) void ktask_execve(void (*fn)(void *), void *args) {
   // asm volatile("cli");
   // hcf();
 
-  entry += fn_addr &
-           (PAGE_SIZE - 1);
+  entry += fn_addr & (PAGE_SIZE - 1);
 
-               __execve_return((uint64_t)entry, (uint64_t)UTASK_STACK_TOP);
+  __execve_return((uint64_t)entry, (uint64_t)UTASK_STACK_TOP);
 #undef current
 }

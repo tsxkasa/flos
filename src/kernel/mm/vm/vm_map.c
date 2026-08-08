@@ -71,7 +71,7 @@ vm_map_t *vm_map_create(void) {
     kmem_cache_free(vm_map_cache, space);
     return NULL;
   }
-  // pmap_copy_kernel_mappings(space->page_table);
+  pmap_copy_kernel_mappings(space->page_table);
 
   space->areas = NULL;
   return space;
