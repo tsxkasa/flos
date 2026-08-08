@@ -1,5 +1,6 @@
 #include <cpu/percpu.h>
 #include <mm/pmap/pmap.h>
+#include <mm/vm/vm_map.h>
 #include <printk.h>
 #include <sched/scheduler.h>
 #include <sched/task.h>
@@ -21,10 +22,4 @@ void exit_task(task_t *task, int code) {
     sched_yield();
     printk(LOG_ERR "Current task cannot exit");
   }
-}
-
-__attribute__((noreturn)) void ktask_execve(void (*fn)(void *), void *args) {
-#define current this_cpu_read(current_task)
-
-#undef current
 }

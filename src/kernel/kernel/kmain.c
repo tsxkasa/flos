@@ -24,25 +24,18 @@
 #include <stdbool.h>
 #include <uacpi/uacpi.h>
 
-void test_proc1(void *_) {
-  while (1) {
-    printk(LOG_DEBUG "Executed test_proc\n");
-  }
-}
-
-void test_proc2(void *_) {
-  while (1) {
-    printk(LOG_DEBUG "Executed test_proc2\n");
+static void umain(void *args) {
+  volatile int x = 1 + 1;
+  (void)x;
+  for (;;) {
+    __asm__ volatile("pause");
   }
 }
 
 void bsp(void *_) {
-  task_t *test = kthread_create(test_proc1, 0);
-  ktask_wake(test);
-  task_t *test2 = kthread_create(test_proc2, 0);
-  ktask_wake(test2);
   while (1) {
     printk(LOG_DEBUG "Executed bsp, arg %llx\n", _);
+    ktask_execve(umain, 0);
   }
 }
 
@@ -70,6 +63,8 @@ void kmain(void) {
   init_keyboard();
 
   init_scheduler();
+  init_late_gdt();
+
   sched_run_bsp(bsp);
 
   printk("Hello kernel!\n");
