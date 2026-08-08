@@ -1,5 +1,8 @@
 #include <gdt.h>
+#include <mm/mm_types.h>
 #include <printk.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 extern void _load_gdt(struct gdtr_t *gdt);
 
@@ -67,4 +70,18 @@ void init_boot_gdt(void) {
   _load_gdt(&gdt);
 
   printk(LOG_INFO "GDT initialized.\n");
+}
+
+void init_late_gdt(void) {
+#define TSS_RSP0_STACK_PAGES 4
+  void *base = kmalloc(TSS_RSP0_STACK_PAGES * PAGE_SIZE);
+
+  if (!base) {
+    printk(LOG_ERR "failed to allocate TSS rsp0 stack\n");
+    return;
+  }
+
+  tss.rsp0 = (uint64_t)base + TSS_RSP0_STACK_PAGES * PAGE_SIZE;
+
+  printk(LOG_INFO "TSS rsp0 = %p\n", tss.rsp0);
 }

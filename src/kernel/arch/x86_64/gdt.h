@@ -60,4 +60,6 @@ enum {
 
 void init_boot_gdt(void);
 
+void init_late_gdt(void);
+
 #endif // _KERNEL_GDT_H
