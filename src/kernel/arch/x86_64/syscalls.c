@@ -1,14 +1,15 @@
+#include <interrupts/idt.h>
 #include <interrupts/isr.h>
 #include <kernel/syscalls.h>
+#include <printk.h>
 #include <stdint.h>
-
-#define SYSCALL_INTERRUPT_X86_64 0x80
 
 long syscall_dispatch(int num, const uint64_t *args) {
   switch (num) {
   case SYSCALL_READ:
     // return sys_read(args[0], args[1], args[2]);
   case SYSCALL_WRITE:
+    printk("printk called from syscall\n");
     // return sys_write(args[0], args[1]);
   default:
     return -1;

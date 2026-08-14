@@ -6,6 +6,7 @@
 #include <gdt.h>
 #include <interrupts/idt.h>
 #include <interrupts/isr.h>
+#include <kernel/syscalls.h>
 #include <mm/mm_types.h>
 #include <printk.h>
 
@@ -26,6 +27,11 @@
 
 void umain(void *args) {
   for (;;) {
+    asm volatile("mov $1, %%rax\n\t"
+                 "int $0x80"
+                 :
+                 :
+                 : "rax", "memory");
     __asm__ volatile("pause");
   }
 }
@@ -33,6 +39,9 @@ void umain(void *args) {
 void bsp(void *_) {
   while (1) {
     printk(LOG_DEBUG "Executed bsp, arg %llx\n", _);
+
+    init_syscalls();
+
     ktask_execve(umain, 0);
   }
 }

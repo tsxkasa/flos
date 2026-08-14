@@ -1,3 +1,4 @@
+#include <gdt.h>
 #include <interrupts/idt.h>
 #include <pic/pic.h>
 #include <printk.h>
@@ -20,7 +21,7 @@ void idt_set_descriptor(uint8_t vector, void *isr, uint8_t flags) {
   struct idt_desc *descriptor = &idt[vector];
 
   descriptor->isr_low = (uint64_t)isr & 0xFFFF;
-  descriptor->kernel_cs = 0x08; // kernel code gdt offset
+  descriptor->kernel_cs = __KERNEL_CS; // kernel code gdt offset
   descriptor->ist = 0;
   descriptor->attributes = flags;
   descriptor->isr_mid = ((uint64_t)isr >> 16) & 0xFFFF;
@@ -37,7 +38,12 @@ void init_idt() {
   pic_remap(0x20, 0x28);
 
   for (uint16_t vector = 0; vector < 256; vector++) {
-    idt_set_descriptor(vector, _isr_stub_table[vector], 0x8E);
+    uint8_t flags = IDT_KERNEL_INTERRUPT;
+    if (vector == SYSCALL_INTERRUPT_X86_64) {
+      flags = IDT_USER_INTERRUPT;
+    }
+
+    idt_set_descriptor(vector, _isr_stub_table[vector], flags);
     vectors[vector] = true;
   }
 
