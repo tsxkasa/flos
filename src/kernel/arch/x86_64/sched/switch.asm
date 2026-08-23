@@ -24,6 +24,11 @@ __switch_to:
   PERCPU_OFFSET r8, current_task
   mov [gs:r8], rsi
 
+  extern tss
+  PERCPU_OFFSET r8, tss
+  mov rax, [rsi + OFFSET_TASK_KSTACK_TOP]
+  mov [gs:r8 + OFFSET_TSS_RSP0], rax
+
   ; TODO: add cpuset save in pmap
   mov rax, [rsi + OFFSET_TASK_VMMAP]
   mov rdi, [rax + OFFSET_VM_MAP_PT]

@@ -1,10 +1,12 @@
 #ifndef _KERNEL_GDT_H
 #define _KERNEL_GDT_H
 
-struct tss_t;
-
 #include <cpu/percpu.h>
 #include <stdint.h>
+
+struct tss_t;
+
+DECLARE_PERCPU(struct tss_t, tss);
 
 struct gdtr_t {
   uint16_t limit;
@@ -60,6 +62,7 @@ enum {
 
 void init_boot_gdt(void);
 
-void init_late_gdt(void);
+// depends on percpu so must be called after percpu is set up
+void init_cpu_gdt(void);
 
 #endif // _KERNEL_GDT_H

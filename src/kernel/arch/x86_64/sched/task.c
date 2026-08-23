@@ -32,6 +32,9 @@ task_t *ktask_fork(task_t *parent, void (*entry)(void *), void *args) {
 
   uintptr_t kstack =
       KSTACK_SIZE + phys_to_higher_half_data(pmm_alloc_pages(KSTACK_PAGES));
+  t->stack_base = kstack - KSTACK_SIZE;
+  t->stack_size = KSTACK_SIZE;
+  t->kstack_top = kstack;
   uint64_t *stack = (uint64_t *)kstack;
 
   // setup stack for new task

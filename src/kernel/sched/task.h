@@ -34,6 +34,7 @@ struct sched_info {
 
 typedef struct task {
   uint64_t stack;
+  uint64_t kstack_top;
   uint64_t tid;
   uint64_t tgid;
 

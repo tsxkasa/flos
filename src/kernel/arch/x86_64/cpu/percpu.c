@@ -19,6 +19,7 @@ void init_percpu() {
     percpu_base[i] = kmalloc(percpu_size);
 
     memcpy(percpu_base[i], _percpu_start, percpu_size);
+    *(void **)percpu_base[i] = percpu_base[i];
 
     printk(LOG_INFO "percpu %i initialized at %llx.\n", i, percpu_base[i]);
   }

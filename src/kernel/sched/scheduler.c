@@ -78,6 +78,8 @@ void init_scheduler() {
   dummy.tid = 0;
 
   this_cpu_write(current_task, &dummy);
+
+  printk(LOG_INFO "scheduler initialized\n");
 }
 
 void sched_run_bsp(void (*bsp)(void *)) {

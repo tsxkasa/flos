@@ -27,9 +27,9 @@ __execve_return:
   pop rax
   or rax, 0x200
 
-  push qword (GDT_USER_DS | 0x3)
+  push qword (__USER_DS | 0x3)
   push qword rsi
   push qword rax
-  push qword (GDT_USER_CS | 0x3)
+  push qword (__USER_CS | 0x3)
   push qword rdi
   iretq

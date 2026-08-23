@@ -28,6 +28,7 @@
 void umain(void *args) {
   for (;;) {
     asm volatile("mov $1, %%rax\n\t"
+                 "mov $0xfda3d5, %%rdi\n\t"
                  "int $0x80"
                  :
                  :
@@ -36,14 +37,33 @@ void umain(void *args) {
   }
 }
 
-void bsp(void *_) {
-  while (1) {
-    printk(LOG_DEBUG "Executed bsp, arg %llx\n", _);
-
-    init_syscalls();
-
-    ktask_execve(umain, 0);
+void umaintest2(void *args) {
+  for (;;) {
+    asm volatile("mov $1, %%rax\n\t"
+                 "mov $0xafafafafa, %%rdi\n\t"
+                 "int $0x80"
+                 :
+                 :
+                 : "rax", "memory");
+    __asm__ volatile("pause");
   }
+}
+
+void umain2bsp(void *_) {
+  printk(LOG_DEBUG "Executed bsp2, arg %llx\n", _);
+
+  ktask_execve(umaintest2, 0);
+}
+
+void bsp(void *_) {
+  printk(LOG_DEBUG "Executed bsp, arg %llx\n", _);
+
+  init_syscalls();
+
+  task_t *t = kthread_create(umain2bsp, 0);
+  ktask_wake(t);
+
+  ktask_execve(umain, 0);
 }
 
 // entry point
@@ -59,9 +79,9 @@ void kmain(void) {
 
   init_kmalloc();
 
-  void *tmp_bfr = kmalloc(PAGE_SIZE * 2);
+  void *tmp_buf = kmalloc(PAGE_SIZE * 2);
 
-  uacpi_setup_early_table_access(tmp_bfr, PAGE_SIZE * 2);
+  uacpi_setup_early_table_access(tmp_buf, PAGE_SIZE * 2);
 
   init_apic();
 
@@ -70,7 +90,7 @@ void kmain(void) {
   init_keyboard();
 
   init_scheduler();
-  init_late_gdt();
+  init_cpu_gdt();
 
   sched_run_bsp(bsp);
 

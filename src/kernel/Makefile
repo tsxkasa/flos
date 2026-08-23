@@ -53,7 +53,8 @@ KERNEL_INCDIRS := $(shell find . -type d | sed 's|^|-I|')
 $(GEN_OFFSETS_BIN): $(GEN_OFFSETS_SRC)
 	@mkdir -p $(@D)
 	$(HOST_CC) -O2 $(KERNEL_INCDIRS) -D__is_kernel \
-	    -D"__attribute__(x)=" \
+		# NOTE: this strips percpu definitions, should reconsider better system later.
+	    -D"DEFINE_PERCPU(type,name)=type name" \
 	    -D"__inline__=inline" \
 	    -D"__asm__(x)=" \
 	    -D"__asm(x)=" \

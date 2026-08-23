@@ -9,7 +9,7 @@ long syscall_dispatch(int num, const uint64_t *args) {
   case SYSCALL_READ:
     // return sys_read(args[0], args[1], args[2]);
   case SYSCALL_WRITE:
-    printk("printk called from syscall\n");
+    printk("printk called from syscall with arg %llx\n", args[0]);
     // return sys_write(args[0], args[1]);
   default:
     return -1;
