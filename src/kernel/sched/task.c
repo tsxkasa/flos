@@ -10,7 +10,7 @@ struct utask_start {
   void (*entry)(void *);
   void *args;
 };
-static void utask_trampoline(void *arg) {
+__attribute__((noreturn)) static void utask_trampoline(void *arg) {
   struct utask_start *start = arg;
 
   void (*entry)(void *) = start->entry;
@@ -19,6 +19,8 @@ static void utask_trampoline(void *arg) {
   kfree(start);
 
   ktask_execve(entry, args);
+
+  __builtin_unreachable();
 }
 
 task_t *utask_spawn(void (*entry)(void *), void *args) {

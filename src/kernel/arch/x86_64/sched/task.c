@@ -112,5 +112,3 @@ __attribute__((noreturn)) void ktask_execve(void (*fn)(void *), void *args) {
   __execve_return((uint64_t)entry, (uint64_t)UTASK_STACK_TOP);
 #undef current
 }
-
-task_t *utask_create(void (*entry)(void *), void *arg) {}
