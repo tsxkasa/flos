@@ -51,16 +51,15 @@ void umaintest2(void *args) {
 
 void umain2bsp(void *_) {
   printk(LOG_DEBUG "Executed bsp2, arg %llx\n", _);
-
   ktask_execve(umaintest2, 0);
 }
 
 void bsp(void *_) {
   printk(LOG_DEBUG "Executed bsp, arg %llx\n", _);
-
+  printk("Hello kernel!\n");
   init_syscalls();
 
-  task_t *t = kthread_create(umain2bsp, 0);
+  task_t *t = ktask_spawn(umain2bsp, NULL);
   ktask_wake(t);
 
   ktask_execve(umain, 0);
@@ -90,11 +89,10 @@ void kmain(void) {
   init_keyboard();
 
   init_scheduler();
+  // have to run this percpu later
   init_cpu_gdt();
 
   sched_run_bsp(bsp);
-
-  printk("Hello kernel!\n");
 
   // We're done, just hang...
   hcf();

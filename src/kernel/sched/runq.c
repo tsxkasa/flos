@@ -24,7 +24,7 @@ void init_runq(task_t *t) {
   memset(rq, 0, sizeof(*rq));
   system_runq = rq;
 
-  task_t *idle = ktask_fork(t, idle_task, NULL);
+  task_t *idle = ktask_spawn(idle_task, NULL);
 
   idle->state = S_TASK_INIT;
   idle->tid = 0;

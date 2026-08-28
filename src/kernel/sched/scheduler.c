@@ -1,5 +1,6 @@
 #include <asm/interrupts.h>
 #include <cpu/percpu.h>
+#include <drivers/tty/tty.h>
 #include <mm/pmap/pmap.h>
 #include <printk.h>
 #include <rbtree.h>
@@ -17,7 +18,7 @@ DEFINE_PERCPU(bool, need_resched);
 static volatile uint64_t pid = 0;
 static volatile uint64_t tid = 0;
 
-static task_t dummy;
+static task_t idle;
 
 void schedule(void) {
 #define current this_cpu_read(current_task)
@@ -71,20 +72,20 @@ void sched_yield_preempt() {
 void init_scheduler() {
   this_cpu_write(need_resched, false);
 
-  memset(&dummy, 0, sizeof(dummy));
+  memset(&idle, 0, sizeof(idle));
 
-  dummy.vmap = kernel_vm_map;
+  idle.vmap = kernel_vm_map;
 
-  dummy.tid = 0;
+  idle.tid = 0;
 
-  this_cpu_write(current_task, &dummy);
+  this_cpu_write(current_task, &idle);
 
   printk(LOG_INFO "scheduler initialized\n");
 }
 
 void sched_run_bsp(void (*bsp)(void *)) {
-  init_runq(&dummy);
-  task_t *t = ktask_fork(&dummy, bsp, (void *)0);
+  init_runq(&idle);
+  task_t *t = ktask_spawn(bsp, NULL);
   ktask_wake(t);
 
   local_timer_start(1000);

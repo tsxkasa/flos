@@ -55,9 +55,6 @@ typedef struct task {
 
   thread_t thread;
 
-  // void (*entry)(void *);
-  // void *arg;
-
   uintptr_t stack_base;
   size_t stack_size;
 } task_t;
@@ -68,14 +65,12 @@ struct runq {
   uint64_t num_threads;
 };
 
-task_t *ktask_fork(task_t *parent, void (*entry)(void *), void *args);
+task_t *ktask_spawn(void (*entry)(void *), void *args);
 void ktask_execve(void (*fn)(void *), void *args);
 void ktask_wake(task_t *task);
 void exit_task(task_t *task, int code);
 
-static inline task_t *kthread_create(void (*entry)(void *), void *arg) {
-  return ktask_fork(this_cpu_read(current_task), (entry), (arg));
-}
+task_t *utask_create(void (*entry)(void *), void *arg);
 
 static inline void idle_task() { hcf(); }
 
