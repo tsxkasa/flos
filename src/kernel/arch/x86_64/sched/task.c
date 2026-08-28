@@ -28,17 +28,15 @@ static void map_user_vm_area_code_and_stack(vm_area_t *code, vm_area_t *stack,
   code->object = NULL;
   code->offset = 0;
 
-  code->next = current->vmap->areas;
-
   stack->start = UTASK_STACK_BOTTOM;
   stack->end = UTASK_STACK_TOP;
   stack->flags = MMU_FLAG_USER | MMU_FLAG_WRITE | MMU_FLAG_PRESENT;
   stack->object = NULL;
   stack->offset = 0;
 
-  stack->next = current->vmap->areas;
-
+  code->next = current->vmap->areas;
   current->vmap->areas = code;
+  stack->next = current->vmap->areas;
   current->vmap->areas = stack;
 }
 

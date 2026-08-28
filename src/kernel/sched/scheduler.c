@@ -86,7 +86,7 @@ void init_scheduler() {
 void sched_run_bsp(void (*bsp)(void *)) {
   init_runq(&idle);
   task_t *t = ktask_spawn(bsp, NULL);
-  ktask_wake(t);
+  task_wake(t);
 
   local_timer_start(1000);
   sched_yield();

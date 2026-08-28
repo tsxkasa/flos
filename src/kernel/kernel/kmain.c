@@ -49,18 +49,13 @@ void umaintest2(void *args) {
   }
 }
 
-void umain2bsp(void *_) {
-  printk(LOG_DEBUG "Executed bsp2, arg %llx\n", _);
-  ktask_execve(umaintest2, 0);
-}
-
 void bsp(void *_) {
   printk(LOG_DEBUG "Executed bsp, arg %llx\n", _);
   printk("Hello kernel!\n");
   init_syscalls();
 
-  task_t *t = ktask_spawn(umain2bsp, NULL);
-  ktask_wake(t);
+  task_t *t = utask_spawn(umaintest2, NULL);
+  task_wake(t);
 
   ktask_execve(umain, 0);
 }

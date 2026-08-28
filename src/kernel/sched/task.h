@@ -66,11 +66,14 @@ struct runq {
 };
 
 task_t *ktask_spawn(void (*entry)(void *), void *args);
+
+void image_load(task_t *t, void *fn, size_t size, uintptr_t entry,
+                uintptr_t stack_bottom, uintptr_t stack_top);
 void ktask_execve(void (*fn)(void *), void *args);
-void ktask_wake(task_t *task);
+void task_wake(task_t *task);
 void exit_task(task_t *task, int code);
 
-task_t *utask_create(void (*entry)(void *), void *arg);
+task_t *utask_spawn(void (*entry)(void *), void *args);
 
 static inline void idle_task() { hcf(); }
 

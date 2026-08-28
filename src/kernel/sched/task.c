@@ -4,8 +4,39 @@
 #include <printk.h>
 #include <sched/scheduler.h>
 #include <sched/task.h>
+#include <stdlib.h>
 
-void ktask_wake(task_t *task) {
+struct utask_start {
+  void (*entry)(void *);
+  void *args;
+};
+static void utask_trampoline(void *arg) {
+  struct utask_start *start = arg;
+
+  void (*entry)(void *) = start->entry;
+  void *args = start->args;
+
+  kfree(start);
+
+  ktask_execve(entry, args);
+}
+
+task_t *utask_spawn(void (*entry)(void *), void *args) {
+  struct utask_start *start = kmalloc(sizeof(struct utask_start));
+  if (start == 0)
+    return 0;
+  start->entry = entry;
+  start->args = args;
+  task_t *t = ktask_spawn(utask_trampoline, start);
+
+  if (t == 0) {
+    kfree(start);
+    return 0;
+  }
+  return t;
+}
+
+void task_wake(task_t *task) {
   if (task->state != S_TASK_RUNNABLE) {
     task->state = S_TASK_RUNNABLE;
     sched_add(task);
