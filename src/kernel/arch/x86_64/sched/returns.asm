@@ -12,11 +12,12 @@ __kfork_return:
   sti
   call rax
 
-  PERCPU_OFFSET rbx, current_task
-  mov rdi, [gs:rbx]
-  mov rsi, 0
-  extern exit_task ; void exit_task(task_t *task, int code);
-  call exit_task
+  ; PERCPU_OFFSET rbx, current_task
+  ; mov rdi, [gs:rbx]
+  ; mov rsi, 0
+  mov rdi, 0
+  extern task_exit ; void task_exit(int code);
+  call task_exit
 
 ; TODO:
 ; extern void __ufork_return(void);

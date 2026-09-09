@@ -34,6 +34,10 @@ void umain(void *args) {
                  "mov %0, %%rdi\n\t"
                  "mov $0xfda3d500, %%rsi\n\t"
                  "int $0x80\n\t"
+                 "mov $1, %%rax\n\t"
+                 "mov %0, %%rdi\n\t"
+                 "movq 0x7ffffff, %%rsi\n\t"
+                 "int $0x80\n\t"
 
                  :
                  : "r"(syscall_string)

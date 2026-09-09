@@ -18,8 +18,6 @@ DEFINE_PERCPU(bool, need_resched);
 static volatile uint64_t pid = 0;
 static volatile uint64_t tid = 0;
 
-static task_t idle;
-
 void schedule(void) {
 #define current this_cpu_read(current_task)
   this_cpu_inc(preempt_count);
@@ -29,7 +27,7 @@ void schedule(void) {
   task_t *prev = current;
   prev->sched.vruntime++;
 
-  if (current->tid != 0)
+  if (current->state == S_TASK_RUNNABLE)
     add_runq(current);
 
   task_t *next = next_runq();
@@ -59,6 +57,8 @@ void schedule(void) {
 
 void sched_add(task_t *t) { add_runq(t); }
 
+void sched_remove(task_t *t) { remove_runq(t); }
+
 void sched_yield() { schedule(); }
 
 void sched_yield_preempt() {
@@ -71,20 +71,12 @@ void sched_yield_preempt() {
 
 void init_scheduler() {
   this_cpu_write(need_resched, false);
-
-  memset(&idle, 0, sizeof(idle));
-
-  idle.vmap = kernel_vm_map;
-
-  idle.tid = 0;
-
-  this_cpu_write(current_task, &idle);
+  init_runq();
 
   printk(LOG_INFO "scheduler initialized\n");
 }
 
 void sched_run_bsp(void (*bsp)(void *)) {
-  init_runq(&idle);
   task_t *t = ktask_spawn(bsp, NULL);
   task_wake(t);
 

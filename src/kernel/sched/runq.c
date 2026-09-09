@@ -1,3 +1,4 @@
+#include <cpu/percpu.h>
 #include <rbtree.h>
 #include <sched/scheduler.h>
 #include <sched/task.h>
@@ -19,7 +20,7 @@ static inline task_t *node_to_task(struct rb_node *node) {
   return t;
 }
 
-void init_runq(task_t *t) {
+void init_runq() {
   struct runq *rq = kmalloc(sizeof(struct runq));
   memset(rq, 0, sizeof(*rq));
   system_runq = rq;
@@ -30,6 +31,7 @@ void init_runq(task_t *t) {
   idle->tid = 0;
 
   rq->idle = idle;
+  this_cpu_write(current_task, idle);
 }
 
 static inline void tree_insert(struct runq *rq, task_t *t) {

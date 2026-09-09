@@ -7,6 +7,7 @@
 #include <mm/vm/slab.h>
 #include <mm/vm/vm_map.h>
 #include <printk.h>
+#include <sched/task.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -282,5 +283,7 @@ segfault:
          present ? "PROTECT " : "NOT_PRESENT ",
          write_fault ? "WRITE " : "READ ", user_fault ? "USER " : "KERNEL ",
          reserved_bit ? "RSVD_BIT " : "", instr_fetch ? "IFETCH" : "");
-  hcf();
+  if (!user_fault)
+    hcf();
+  task_exit(1);
 }

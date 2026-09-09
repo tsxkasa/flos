@@ -13,7 +13,7 @@ DECLARE_PERCPU(bool, need_resched);
 void schedule();
 void init_scheduler(void);
 
-void init_runq(task_t *t);
+void init_runq();
 void add_runq(task_t *t);
 void remove_runq(task_t *t);
 task_t *next_runq();
@@ -21,6 +21,7 @@ task_t *next_runq();
 void sched_yield(void);
 void sched_yield_preempt(void);
 void sched_add(task_t *t);
+void sched_remove(task_t *t);
 
 void sched_run_bsp(void (*bsp)(void *));
 

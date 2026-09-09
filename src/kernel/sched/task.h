@@ -71,7 +71,8 @@ void image_load(task_t *t, void *fn, size_t size, uintptr_t entry,
                 uintptr_t stack_bottom, uintptr_t stack_top);
 void ktask_execve(void (*fn)(void *), void *args);
 void task_wake(task_t *task);
-void exit_task(task_t *task, int code);
+// exits the current task
+void task_exit(int code);
 
 task_t *utask_spawn(void (*entry)(void *), void *args);
 

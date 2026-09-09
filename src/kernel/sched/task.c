@@ -45,14 +45,14 @@ void task_wake(task_t *task) {
   }
 }
 
-void exit_task(task_t *task, int code) {
-  if (task->state == S_TASK_RUNNABLE)
-    remove_runq(task);
+void task_exit(int code) {
+#define current this_cpu_read(current_task)
+  if (current->state == S_TASK_RUNNABLE)
+    sched_remove(current);
 
-  task->state = S_TASK_ZOMBIE;
+  current->state = S_TASK_ZOMBIE;
 
-  if (task == this_cpu_read(current_task)) {
-    sched_yield();
-    printk(LOG_ERR "Current task cannot exit");
-  }
+  sched_yield();
+  // printk(LOG_ERR "Current task cannot exit");
+#undef current
 }
