@@ -3,8 +3,8 @@
 #include <drivers/video/font/psf_font.h>
 #include <drivers/video/framebuffer/framebuffer.h>
 #include <printk.h>
-#include <string.h>
 #include <stdint.h>
+#include <string.h>
 
 #define MAX_ROWS 512
 

@@ -16,6 +16,7 @@
 #include <mm/vm/vm_map.h>
 #include <sched/scheduler.h>
 #include <sched/task.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include <pic/apic/apic.h>
@@ -25,27 +26,34 @@
 #include <stdbool.h>
 #include <uacpi/uacpi.h>
 
+static const char syscall_string[] = "printk called from user with arg: %llx\n";
+static const char return_syscall[] = "syscall returned value: %llx\n";
 void umain(void *args) {
   for (;;) {
     asm volatile("mov $1, %%rax\n\t"
-                 "mov $0xfda3d5, %%rdi\n\t"
-                 "int $0x80"
+                 "mov %0, %%rdi\n\t"
+                 "mov $0xfda3d500, %%rsi\n\t"
+                 "int $0x80\n\t"
+
                  :
-                 :
-                 : "rax", "memory");
-    __asm__ volatile("pause");
+                 : "r"(syscall_string)
+                 : "rax", "rdi", "rsi", "memory");
   }
 }
 
-void umaintest2(void *args) {
+void umain2(void *args) {
   for (;;) {
     asm volatile("mov $1, %%rax\n\t"
-                 "mov $0xafafafafa, %%rdi\n\t"
+                 "mov %0, %%rdi\n\t"
+                 "mov $0xafafafaf, %%rsi\n\t"
+                 "int $0x80\n\t"
+                 "mov %1, %%rdi\n\t"
+                 "mov %%rax, %%rsi\n\t"
+                 "mov $1, %%rax\n\t"
                  "int $0x80"
                  :
-                 :
-                 : "rax", "memory");
-    __asm__ volatile("pause");
+                 : "r"(syscall_string), "r"(return_syscall)
+                 : "rax", "rdi", "memory");
   }
 }
 
@@ -54,7 +62,7 @@ void bsp(void *_) {
   printk("Hello kernel!\n");
   init_syscalls();
 
-  task_t *t = utask_spawn(umaintest2, NULL);
+  task_t *t = utask_spawn(umain2, NULL);
   task_wake(t);
 
   ktask_execve(umain, 0);
